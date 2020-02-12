@@ -1,3 +1,4 @@
+
 // JavaScript Document
 "use strict";
 
@@ -17,7 +18,6 @@ TileField.prototype = Object.create(powerupjs.GameObjectGrid.prototype);
 
 TileField.prototype.handleInput = function(delta) {
     powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
-
     if (powerupjs.Touch.isTouchDevice) {
         this.handleTouchInput(delta);
     } else {
@@ -50,7 +50,8 @@ TileField.prototype.handleComputerInput = function(delta) {
 };
 
 TileField.prototype.handleTouchInput = function(delta) {
-    if (powerupjs.Touch.containsTouchPress(this.tileFieldHolder.boundingBox)) {
+    var tileFieldHolder = this.root.find(ID.tile_field_holder);
+    if (powerupjs.Touch.containsTouchPress(tileFieldHolder.boundingBox)) {
         this.dragging = true;
     }
     for (let i = this.columns - 1; i >= 0; i--) {
@@ -280,7 +281,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         } else if (!swapBack) {
             realTiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
-    }, 260, (this, tile1, tile2));
+    }, 260, (this, tile1, tile2)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
 };
 
 TileField.prototype.shiftTiles = function() {
@@ -326,21 +327,21 @@ TileField.prototype.lookAtMatch = function(index, column, row, match) {
 };
 
 TileField.prototype.selectTile = function(tile) {
-    var selectBorder = this.root.find(ID.selectBorder);
+    var selectBorder = this.root.find(ID.select_border);
     if (tile.type === TileType.background) { // do not select background tiles
         return;
     }
     this.deselect();
     console.log("selecting tile at " + tile.position);
     this.selected = tile;
-    this.selected.ID = ID.selected;
+    this.selected.ID = ID.selected_tile;
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
 };
 
 TileField.prototype.deselect = function() {
-    var selectBorder = this.root.find(ID.selectBorder)
+    var selectBorder = this.root.find(ID.select_border)
     selectBorder.position = new powerupjs.Vector2(-2000, -2000);
     if (this.selected == null || this.selected == undefined) {
         return;
