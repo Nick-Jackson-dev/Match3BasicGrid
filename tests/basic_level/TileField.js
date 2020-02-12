@@ -67,7 +67,8 @@ TileField.prototype.handleComputerInput = function(delta) {
 };
 
 TileField.prototype.handleTouchInput = function(delta) {
-    if (powerupjs.Touch.containsTouchPress(this.tileFieldHolder.boundingBox)) {
+    var tileFieldHolder = this.root.find(ID.tile_field_holder);
+    if (powerupjs.Touch.containsTouchPress(tileFieldHolder.boundingBox)) {
         this.dragging = true;
     }
     for (let i = this.columns - 1; i >= 0; i--) {
@@ -368,21 +369,21 @@ TileField.prototype.lookAtMatch = function(index, column, row, match) {
 };
 
 TileField.prototype.selectTile = function(tile) {
-    var selectBorder = this.root.find(ID.selectBorder);
+    var selectBorder = this.root.find(ID.select_border);
     if (tile.type === TileType.background) { // do not select background tiles
         return;
     }
     this.deselect();
     console.log("selecting tile at " + tile.position);
     this.selected = tile;
-    this.selected.ID = ID.selected;
+    this.selected.ID = ID.selected_tile;
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
 };
 
 TileField.prototype.deselect = function() {
-    var selectBorder = this.root.find(ID.selectBorder)
+    var selectBorder = this.root.find(ID.select_border)
     selectBorder.position = new powerupjs.Vector2(-2000, -2000);
     if (this.selected == null || this.selected == undefined) {
         return;

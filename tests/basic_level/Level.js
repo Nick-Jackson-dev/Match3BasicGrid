@@ -15,7 +15,7 @@ function Level(levelData, special) {
     this.levelData = levelData;
     //background would normally load elsewhere (upon going to level in the playingstate) based on the player location
     this.add(new powerupjs.SpriteGameObject(sprites.background_charybdo_treasure_cave, ID.layer_background));
-    this.tileFieldHolder = new powerupjs.SpriteGameObject(sprites.background_standard_tile_field, ID.layer_background_1);
+    this.tileFieldHolder = new powerupjs.SpriteGameObject(sprites.background_standard_tile_field, ID.layer_background_1, ID.tile_field_holder);
     this.tileFieldHolder.origin = this.tileFieldHolder.center;
     this.tileFieldHolder.position = new powerupjs.Vector2(powerupjs.Game.size.x / 2, powerupjs.Game.size.y / 2);
     this.add(this.tileFieldHolder);
@@ -54,7 +54,7 @@ Level.prototype.loadTiles = function() {
     this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, ID.tiles);
     this.tiles.position = new powerupjs.Vector2(342, 61);
     this.add(this.tiles);
-    this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.selectBorder);
+    this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.select_border);
     this.selectBorder.position = new powerupjs.Vector2(-2000, -2000);
     this.selectBorder.parent = this.tiles;
     this.add(this.selectBorder);
