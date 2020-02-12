@@ -17,24 +17,7 @@ TileField.prototype = Object.create(powerupjs.GameObjectGrid.prototype);
 
 TileField.prototype.handleInput = function(delta) {
     powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
-    /*if (powerupjs.Mouse.containsMousePress(new powerupjs.Rectangle(0, 0, 1000, 1000))) {
-        this.resolveMatches();
-        console.log("resolved mathces");
-        //need to be able to make at least one move so find out if there are any moves
-        this.findMoves();
-        console.log("found moves");
-        for (let i = this.rows - 1; i >= 0; i--) {
-            for (let j = this.columns - 1; j >= 0; j--) {
-                if (this.at(j, i).type === TileType.deleted) {
-                    console.log("this tile type is deleted");
-                }
-                if (this.at(j, i).shift > 0) {
-                    console.log("row: " + i + ", col: " + j + " - shift = " + this.at(j, i).shift);
-                    break;
-                }
-            }
-        }
-    }*/
+
     if (powerupjs.Touch.isTouchDevice) {
         this.handleTouchInput(delta);
     } else {
@@ -149,25 +132,6 @@ TileField.prototype.handleSwap = function(tile) {
 
     this.dragging = false;
     this.swapTiles(tile, this.selected); //this has a timer for animation purposes
-    /*//all this should wait on that timer to execute properly
-    this.findMatches();
-    if (this.matches.length > 0) {
-        this.resolveMatches();
-        this.deselect();
-        this.findMoves();
-        if (this.moves.length === 0) {
-            //this.shuffle();
-        }
-    } else {
-        this.swapTiles(tile, this.selected);
-    }*/
-
-    /*this.dragging = false;
-    $LAB
-        .swapTiles(tile, this.selected).wait() //this has a timer for animation purposes
-        .finishHandlingSwap(tile);
-    */
-
 };
 
 TileField.prototype.finishHandlingSwap = function(tile) {
@@ -316,13 +280,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         } else if (!swapBack) {
             realTiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
-    }, 260, (this, tile1, tile2)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
-    //uncomment this and the animation works but the matching is delayed to the next switch.
-    //also it doesn't continue with the method that calls this one, so if there is no match it doesn't switch back.
-    //this is because it is actually returning to that previous method and checking for matches before this setTimeout even executes.
-    //this.addAt(swap2, x1, y1);
-    //his.tiles.addAt(swap, x2, y2);
-    //tile1.beStill(); //comment for animation; uncomment to make matches instant - note that animation is broken
+    }, 260, (this, tile1, tile2));
 };
 
 TileField.prototype.shiftTiles = function() {
