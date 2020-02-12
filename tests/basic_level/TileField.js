@@ -3,7 +3,6 @@
 "use strict";
 
 //TileField will inhert from powerupjsGameObjectGrid and hold tiles in a grid determined by the parameters passed
-//MAY NEED BIG REWORK
 
 function TileField(rows, columns, layer, id) {
     powerupjs.GameObjectGrid.call(this, rows, columns, layer, id);
@@ -98,7 +97,6 @@ TileField.prototype.checkValidSwap = function(tile) {
     if (tile.type === TileType.special) {
         return true;
     } else if (tile === this.selected) {
-        console.log("same Tile");
         return false;
     } else if (tile.type === TileType.deleted || tile.type === TileType.background) {
         console.log("deleted or background tile");
@@ -127,27 +125,8 @@ TileField.prototype.canSwap = function(tile, tile2) {
 
 //swaps the tiles, stops taking input for touch or hold, then checks for matches and resolves, if no matches it swaps them back and makes the newly clicked one the selected tile
 TileField.prototype.handleSwap = function(tile) {
-    console.log("selected position: " + this.selected.position);
-    tile.stopped = false;
-    this.selected.stopped = false;
-
     this.dragging = false;
     this.swapTiles(tile, this.selected); //this has a timer for animation purposes
-};
-
-TileField.prototype.finishHandlingSwap = function(tile) {
-    console.log("sure hope it waits");
-    this.findMatches();
-    if (this.matches.length > 0) {
-        this.resolveMatches();
-        this.deselect();
-        this.findMoves();
-        if (this.moves.length === 0) {
-            //this.shuffle();
-        }
-    } else {
-        this.swapTiles(tile, this.selected); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
-    }
 };
 
 //takes into account special matches needed and then finds those then horizontal matches, then vertical matches
@@ -169,6 +148,7 @@ TileField.prototype.resolveMatches = function() {
     while (this.matches.length > 0) {
         this.removeMatches();
         this.shiftTiles();
+        //this.fallTiles();
         this.findMatches();
     }
 };
@@ -238,7 +218,7 @@ TileField.prototype.swap = function(x1, y1, x2, y2) {
 //this one should have animation tied in someway; cannot get to work yet
 TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swapBack = typeof swapBack !== 'undefined' ? swapBack : false;
-    if (tile1 == null || tile2 == null) {
+    if (tile1 == null || tile2 == null || !tile1.moveable || !tile2.moveable) {
         console.log("tiles don't exist");
         return;
     }
@@ -264,12 +244,10 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swap2 = tile2;
     setTimeout(function(tiles) {
         var realTiles = tiles.parent;
-        console.log(realTiles);
         realTiles.addAt(swap2, x1, y1);
         realTiles.addAt(swap, x2, y2);
         realTiles.at(x1, y1).beStill();
         realTiles.at(x2, y2).beStill();
-        console.log("sure hope it waits");
         realTiles.findMatches();
         if (realTiles.matches.length > 0) {
             realTiles.resolveMatches();
@@ -285,8 +263,8 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
 };
 
 TileField.prototype.shiftTiles = function() {
-    for (var i = this.columns - 1; i >= 0; i--) {
-        for (var j = this.rows - 1; j >= 0; j--) { //loop bottom to top
+    for (let i = this.columns - 1; i >= 0; i--) {
+        for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
             if (this.at(i, j).type === TileType.deleted) {
                 var t = new BasicTile(TileType.basic);
                 this.addAt(t, i, j);
@@ -300,9 +278,40 @@ TileField.prototype.shiftTiles = function() {
             }
             //reset shift
             this.at(i, j).shift = 0;
-            console.log(this.at(i, j).shift);
         }
     }
+};
+
+TileField.prototype.fallTiles = function () {
+    //this should be bottom to top, but lets just get it to work for now
+    for (let i = 0, col = this.columns; i < col; ++i) {
+        for (let j = 0, row = this.rows - 1; j < row; ++j) {
+            //if there is nothing under the tile at i,j it should fall until something is
+            //get the distance it will have to fall and find the time based on _tileSpeed
+            if(this.at(i, j+1).type === TileType.deleted && this.at(i, j).moveable) {
+                let falltime = null;
+                this.at(i, j).falling = true;
+                //rook down column to find where it needs to fall to
+                for (let checkRow = j, lastRow = this.rows; checkRow < lastRow; checkRow++) {
+                    if(this.at(i, checkRow).type !== TileType.deleted || this.at(i, checkRow).type !== TileType.background || this.isSolid(i, checkRow)) {
+                        fallTile = this.getFallTime(j, checkRow);//gets fall time based on the number of cells needed to fall and the size of the cells
+                    }
+                }
+                //do setTimeout based on fallTime to do the addAt, check for matches and all that
+                this.addAt(this.at(i, j), i, j+1);
+            } else {
+                this.at(i, j).beStill();
+            }
+        }
+    }
+};
+
+TileField.prototype.getFallTime = function (high, low) {
+
+};
+
+TileField.prototype.isSolid = function (col, row) {
+
 };
 
 TileField.prototype.loopMatches = function() {
@@ -312,7 +321,7 @@ TileField.prototype.loopMatches = function() {
         var cOffset = 0;
         var rOffset = 0;
         for (let j = match.length - 1; j >= 0; j--) {
-            this.lookAtMatch(i, match.column + cOffset, match.row + rOffset, match);
+            this.lookAtMatch(match.column + cOffset, match.row + rOffset);
             if (match.horizontal) {
                 cOffset++;
             } else if (!match.horizontal) {
@@ -322,8 +331,8 @@ TileField.prototype.loopMatches = function() {
     }
 };
 
-TileField.prototype.lookAtMatch = function(index, column, row, match) {
-    this.at(column, row).type = TileType.deleted;
+TileField.prototype.lookAtMatch = function(column, row) {
+    this.at(column, row).deleteTile();
 };
 
 TileField.prototype.selectTile = function(tile) {
