@@ -148,7 +148,6 @@ TileField.prototype.resolveMatches = function() {
     while (this.matches.length > 0) {
         this.removeMatches();
         this.shiftTiles();
-        //this.fallTiles();
         this.findMatches();
     }
 };
@@ -282,38 +281,6 @@ TileField.prototype.shiftTiles = function() {
     }
 };
 
-TileField.prototype.fallTiles = function () {
-    //this should be bottom to top, but lets just get it to work for now
-    for (let i = 0, col = this.columns; i < col; ++i) {
-        for (let j = 0, row = this.rows - 1; j < row; ++j) {
-            //if there is nothing under the tile at i,j it should fall until something is
-            //get the distance it will have to fall and find the time based on _tileSpeed
-            if(this.at(i, j+1).type === TileType.deleted && this.at(i, j).moveable) {
-                let falltime = null;
-                this.at(i, j).falling = true;
-                //rook down column to find where it needs to fall to
-                for (let checkRow = j, lastRow = this.rows; checkRow < lastRow; checkRow++) {
-                    if(this.at(i, checkRow).type !== TileType.deleted || this.at(i, checkRow).type !== TileType.background || this.isSolid(i, checkRow)) {
-                        fallTile = this.getFallTime(j, checkRow);//gets fall time based on the number of cells needed to fall and the size of the cells
-                    }
-                }
-                //do setTimeout based on fallTime to do the addAt, check for matches and all that
-                this.addAt(this.at(i, j), i, j+1);
-            } else {
-                this.at(i, j).beStill();
-            }
-        }
-    }
-};
-
-TileField.prototype.getFallTime = function (high, low) {
-
-};
-
-TileField.prototype.isSolid = function (col, row) {
-
-};
-
 TileField.prototype.loopMatches = function() {
     for (var i = this.matches.length - 1; i >= 0; i--) {
         //column, row, length, horizontal
@@ -369,9 +336,7 @@ TileField.prototype.findHorizontalMoves = function() {
             this.typeSwap(j, i, j + 1, i);
             if (this.matches.length > 0) {
                 this.moves.push({ column1: j, row1: i, column2: j + 1, row2: i });
-                //console.log(" horizontal - moves: " + this.moves.length);
             }
-
         }
     }
 };

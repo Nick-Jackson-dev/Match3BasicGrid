@@ -60,8 +60,9 @@ var powerupjs = (function (powerupjs) {
     };
 
     GameObjectList.prototype.handleInput = function (delta) {
-        for (var i = this._gameObjects.length - 1; i >= 0; --i)
-            this._gameObjects[i].handleInput(delta);
+        for (var i = this._gameObjects.length - 1; i >= 0; --i){
+             this._gameObjects[i].handleInput(delta);
+        }
     };
 
     GameObjectList.prototype.update = function (delta) {
