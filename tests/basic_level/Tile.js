@@ -30,6 +30,12 @@ function Tile(sprite, tileTp, layer, id) {
 
 Tile.prototype = Object.create(powerupjs.SpriteGameObject.prototype);
 
+Object.defineProperty(Tile.prototype, "tileSpeed", {
+    get: function() {
+        return this._tileSpeed;
+    }
+});
+
 Object.defineProperty(Tile.prototype, "xCoordinate", {
     get: function() {
         return this.parent.getTileXCoordinate(this);
@@ -50,6 +56,10 @@ Tile.prototype.beStill = function() {
     this.shiftingUp = false;
     this.shiftingDown = false;
     //may need t make sure tile is not offset from where it should be in grid
+};
+
+Tile.prototype.isSolid = function () {
+    return this.type === TileType.basic || this.type === TileType.special || !this.moveable;
 };
 
 Tile.prototype.deleteTile = function () {

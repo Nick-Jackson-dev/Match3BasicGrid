@@ -57,6 +57,9 @@ var powerupjs = (function (powerupjs) {
             }
         return powerupjs.Vector2.zero;
     };
+    GameObjectGrid.prototype.handleInput = function (delta) {
+        powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
+    };
 
     powerupjs.GameObjectGrid = GameObjectGrid;
     return powerupjs;
