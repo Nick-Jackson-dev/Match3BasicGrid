@@ -55,7 +55,7 @@ Tile.prototype.beStill = function() {
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
-    //may need t make sure tile is not offset from where it should be in grid
+    this.position = this.parent.getAnchorPosition(this);
 };
 
 Tile.prototype.isSolid = function () {

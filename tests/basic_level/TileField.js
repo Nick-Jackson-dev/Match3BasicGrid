@@ -148,7 +148,6 @@ TileField.prototype.resolveMatches = function() {
     while (this.matches.length > 0) {
         this.removeMatches();
         this.shiftTiles();
-        //this.fallTiles();
         this.findMatches();
     }
 };
@@ -282,52 +281,6 @@ TileField.prototype.shiftTiles = function() {
     }
 };
 
-TileField.prototype.fallTiles = function () {
-    var fallTime = null;
-    //this should be bottom to top, but lets just get it to work for now
-    for (let i = 0, col = this.columns; i < col; ++i) {
-        for (let j = this.rows - 2; j > 0; --j) {
-            //if there is nothing under the tile at i,j it should fall until something is
-            //get the distance it will have to fall and find the time based on _tileSpeed
-            if((!this.at(i, j+1).isSolid()) && this.at(i, j).moveable) {
-                fallTime = 0;
-                this.at(i, j).falling = true;
-                //rook down column to find where it needs to fall to
-                for (var checkRow = j, lastRow = this.rows; checkRow < lastRow; checkRow++) {
-                    if(this.at(i, checkRow).isSolid() || checkRow == lastRow) {
-                        fallTime = this.getFallTime(this.at(i, j), j, checkRow);//gets fall time based on the number of cells needed to fall and the size of the cells
-                        //do setTimeout based on fallTime to do the addAt, check for matches and all that
-                        setTimeout(function (tiles) {
-                            console.log(tiles);
-                            tiles.addAt(tiles.at(i, j), i, checkRow);
-                            tiles.at(i, checkRow).beStill();
-                            tiles.resolveMatches();
-                            tiles.findMoves();
-                        }, fallTime, (this));
-                        //continue;
-                        break;
-                    }
-                }
-                //this.addAt(this.at(i, j), i, j+1);
-            } else {
-                this.at(i, j).beStill();
-                continue;
-            }
-        }
-    }
-};
-
-TileField.prototype.getFallTime = function (tile, high, low) {
-    let distance = -((high - low) * this.cellHeight); //this will be in pixels
-    console.log(this.cellHeight + " , " + high + " , " + low);
-    console.log(distance);
-    return distance / tile.tileSpeed;
-};
-
-TileField.prototype.isSolid = function (col, row) {
-    return !this.at(col, row).type === TileType.deleted || !this.at(col, row).type === TileType.background || row == this.rows - 1;
-};
-
 TileField.prototype.loopMatches = function() {
     for (var i = this.matches.length - 1; i >= 0; i--) {
         //column, row, length, horizontal
@@ -383,9 +336,7 @@ TileField.prototype.findHorizontalMoves = function() {
             this.typeSwap(j, i, j + 1, i);
             if (this.matches.length > 0) {
                 this.moves.push({ column1: j, row1: i, column2: j + 1, row2: i });
-                //console.log(" horizontal - moves: " + this.moves.length);
             }
-
         }
     }
 };
