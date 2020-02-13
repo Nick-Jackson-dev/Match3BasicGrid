@@ -70,16 +70,28 @@ Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
     }
+
+    /*if(this.collidesWith(this.nextTileDown()) && this.falling) {
+        this.falling = false;
+        var newAnchor = this.findAppropriateAnchor();
+        var fallTime = this.getFallTime
+        setTimeout(function (tile) {
+            tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
+            tile.beStill();
+        }, fallTime, (this))
+        this.beStill();
+    }*/
+
     if (this.shiftingLeft) {
-        this.velocity.x = -this._tileSpeed;
+        this.velocity.x = -this.tileSpeed;
     } else if (this.shiftingRight) {
-        this.velocity.x = this._tileSpeed;
+        this.velocity.x = this.tileSpeed;
     } else if (this.shiftingUp) {
-        this.velocity.y = -this._tileSpeed;
+        this.velocity.y = -this.tileSpeed;
     } else if (this.shiftingDown) {
-        this.velocity.y = this._tileSpeed;
+        this.velocity.y = this.tileSpeed;
     } else if (this.falling) {
-        this.velocity.y = this._tileSpeed;
+        this.velocity.y = this.tileSpeed;
     } else {
         this.velocity.x = 0;
         this.velocity.y = 0;
@@ -91,4 +103,29 @@ Tile.prototype.draw = function() {
     if (this.type === TileType.background || this.type === TileType.deleted)
         return;
     powerupjs.SpriteGameObject.prototype.draw.call(this);
+};
+
+Tile.prototype.nextTileDown = function () {
+    var tiles = this.parent;
+    var currentRow = this.yCoordninate - 1;
+    var column = this.xCoordinate - 1;
+    for(let i = currentRow; i < tiles.rows; i++) {
+        if(tiles.at(column, i).isSolid()){
+            return tiles.at(column, 1);
+        }
+    }
+    return;
+};
+
+Tile.prototype.getFallTime = function () {
+    let distance = this.yCoordinate - this.nextTileDown().yCoordinate;
+    return distance / this.tileSpeed;
+};
+
+Tile.prototype.findAppropriateAnchor = function () {
+    //let tiles = this.parent;
+    let x = Math.floor(this.position.x / this.width);
+    let y = Math.floor(this.position.y / this.height);
+    let newAnchor = {x: x, y: y};
+    return newAnchor;
 };

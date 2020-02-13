@@ -147,7 +147,7 @@ TileField.prototype.resolveMatches = function() {
 
     while (this.matches.length > 0) {
         this.removeMatches();
-        this.shiftTiles();
+        //this.shiftTiles();
         this.findMatches();
     }
 };
@@ -176,6 +176,67 @@ TileField.prototype.removeMatches = function() {
             }
         }
     }
+};
+
+TileField.prototype.shiftTiles = function() {
+    for (let i = this.columns - 1; i >= 0; i--) {
+        for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
+            if (this.at(i, j).type === TileType.deleted) {
+                var t = new BasicTile(TileType.basic);
+                this.addAt(t, i, j);
+            } else {
+                //console.log("no shift");
+                //swap tile to shift it
+                var shift = this.at(i, j).shift;
+                if (shift > 0) {
+                    this.swap(i, j, i, j + shift);
+                }
+            }
+            //reset shift
+            this.at(i, j).shift = 0;
+        }
+    }
+};
+
+TileField.prototype.shiftTilesFall = function() {
+    for (let i = this.columns - 1; i >= 0; i--) {
+        for (let j = this.rows - 2; j >= 0; j--) { //loop bottom to top
+            if (this.at(i, j + 1).type === TileType.deleted || this.at(i, j + 1).type === TileType.empty || !this.at(i, j + 1).isSolid()) {
+                var nextTile = this.nextTileDown(this.at(i, j));
+                this.at(i, j).falling = true;
+            } else {
+                //console.log("no shift");
+                //swap tile to shift it
+                var shift = this.at(i, j).shift;
+                if (shift > 0) {
+                    this.swap(i, j, i, j + shift);
+                }
+            }
+            //reset shift
+            this.at(i, j).shift = 0;
+        }
+    }
+};
+
+TileField.prototype.loopMatches = function() {
+    for (var i = this.matches.length - 1; i >= 0; i--) {
+        //column, row, length, horizontal
+        var match = this.matches[i];
+        var cOffset = 0;
+        var rOffset = 0;
+        for (let j = match.length - 1; j >= 0; j--) {
+            this.lookAtMatch(match.column + cOffset, match.row + rOffset);
+            if (match.horizontal) {
+                cOffset++;
+            } else if (!match.horizontal) {
+                rOffset++;
+            }
+        }
+    }
+};
+
+TileField.prototype.lookAtMatch = function(column, row) {
+    this.at(column, row).deleteTile();
 };
 
 //swaps the type of 2 tiles - used for finding moves
@@ -259,47 +320,6 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
             realTiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
     }, 260, (this, tile1, tile2)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
-};
-
-TileField.prototype.shiftTiles = function() {
-    for (let i = this.columns - 1; i >= 0; i--) {
-        for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
-            if (this.at(i, j).type === TileType.deleted) {
-                var t = new BasicTile(TileType.basic);
-                this.addAt(t, i, j);
-            } else {
-                //console.log("no shift");
-                //swap tile to shift it
-                var shift = this.at(i, j).shift;
-                if (shift > 0) {
-                    this.swap(i, j, i, j + shift);
-                }
-            }
-            //reset shift
-            this.at(i, j).shift = 0;
-        }
-    }
-};
-
-TileField.prototype.loopMatches = function() {
-    for (var i = this.matches.length - 1; i >= 0; i--) {
-        //column, row, length, horizontal
-        var match = this.matches[i];
-        var cOffset = 0;
-        var rOffset = 0;
-        for (let j = match.length - 1; j >= 0; j--) {
-            this.lookAtMatch(match.column + cOffset, match.row + rOffset);
-            if (match.horizontal) {
-                cOffset++;
-            } else if (!match.horizontal) {
-                rOffset++;
-            }
-        }
-    }
-};
-
-TileField.prototype.lookAtMatch = function(column, row) {
-    this.at(column, row).deleteTile();
 };
 
 TileField.prototype.selectTile = function(tile) {
