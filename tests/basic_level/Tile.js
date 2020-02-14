@@ -1,7 +1,6 @@
 // JavaScript Document
 "use strict";
 
-//NEEDS BIG REPORK IF IT IS EVEN NECESSARY
 
 var TileType = {
     background: 0,
@@ -70,17 +69,19 @@ Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
     }
-
-    if (this.collidesWith(this.nextTileDown()) && this.falling) {
-        this.falling = false;
-        var newAnchor = this.findAppropriateAnchor();
-        var fallTime = this.getFallTime;
-        setTimeout(function(tile) {
-            console.log(tile);
-            tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
-            tile.beStill();
-        }, fallTime, this);
-    }
+    /*
+        if (this.collidesWith(this.nextTileDown()) && this.falling) {
+            this.falling = false;
+            var newAnchor = this.findAppropriateAnchor(this.nextTileDown());
+            var fallTime = this.getFallTime() * 1000;
+            console.log("Fall time : " + fallTime);
+            setTimeout(function(tile) {
+                console.log("old anchor - x : " + tile.xCoordinate + " y : " + tile.yCoordinate);
+                console.log("new anchor - x: " + newAnchor.x + " y : " + newAnchor.y + "-");
+                tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
+                tile.beStill();
+            }, fallTime, this);
+    }*/
 
     if (this.shiftingLeft) {
         this.velocity.x = -this.tileSpeed;
@@ -118,14 +119,14 @@ Tile.prototype.nextTileDown = function() {
 };
 
 Tile.prototype.getFallTime = function() {
-    let distance = this.yCoordinate - this.nextTileDown().yCoordinate;
+    let distance = -(this.yCoordinate - this.nextTileDown().yCoordinate);
+    console.log(distance);
     return distance / this.tileSpeed;
 };
 
-Tile.prototype.findAppropriateAnchor = function() {
+Tile.prototype.findAppropriateAnchor = function(tile) {
     //let tiles = this.parent;
-    let x = Math.floor(this.position.x / this.width);
-    let y = Math.floor(this.position.y / this.height);
-    let newAnchor = { x: x, y: y };
-    return newAnchor;
+    let x = tile.xCoordinate;
+    let y = tile.yCoordinate + 1;
+    return new powerupjs.Vector2(x, y);
 };
