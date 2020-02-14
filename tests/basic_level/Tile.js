@@ -58,11 +58,11 @@ Tile.prototype.beStill = function() {
     this.position = this.parent.getAnchorPosition(this);
 };
 
-Tile.prototype.isSolid = function () {
+Tile.prototype.isSolid = function() {
     return this.type === TileType.basic || this.type === TileType.special || !this.moveable;
 };
 
-Tile.prototype.deleteTile = function () {
+Tile.prototype.deleteTile = function() {
     this.type = TileType.deleted;
 };
 
@@ -71,16 +71,16 @@ Tile.prototype.update = function(delta) {
         return;
     }
 
-    /*if(this.collidesWith(this.nextTileDown()) && this.falling) {
+    if (this.collidesWith(this.nextTileDown()) && this.falling) {
         this.falling = false;
         var newAnchor = this.findAppropriateAnchor();
-        var fallTime = this.getFallTime
-        setTimeout(function (tile) {
+        var fallTime = this.getFallTime;
+        setTimeout(function(tile) {
+            console.log(tile);
             tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
             tile.beStill();
-        }, fallTime, (this))
-        this.beStill();
-    }*/
+        }, fallTime, this);
+    }
 
     if (this.shiftingLeft) {
         this.velocity.x = -this.tileSpeed;
@@ -105,27 +105,27 @@ Tile.prototype.draw = function() {
     powerupjs.SpriteGameObject.prototype.draw.call(this);
 };
 
-Tile.prototype.nextTileDown = function () {
+Tile.prototype.nextTileDown = function() {
     var tiles = this.parent;
-    var currentRow = this.yCoordninate - 1;
-    var column = this.xCoordinate - 1;
-    for(let i = currentRow; i < tiles.rows; i++) {
-        if(tiles.at(column, i).isSolid()){
-            return tiles.at(column, 1);
+    var currentRow = this.yCoordinate;
+    var column = this.xCoordinate;
+    for (let i = currentRow; i < tiles.rows; i++) {
+        if (tiles.at(column, i) !== null && tiles.at(column, i).isSolid()) {
+            return tiles.at(column, i);
         }
     }
-    return;
+    return false;
 };
 
-Tile.prototype.getFallTime = function () {
+Tile.prototype.getFallTime = function() {
     let distance = this.yCoordinate - this.nextTileDown().yCoordinate;
     return distance / this.tileSpeed;
 };
 
-Tile.prototype.findAppropriateAnchor = function () {
+Tile.prototype.findAppropriateAnchor = function() {
     //let tiles = this.parent;
     let x = Math.floor(this.position.x / this.width);
     let y = Math.floor(this.position.y / this.height);
-    let newAnchor = {x: x, y: y};
+    let newAnchor = { x: x, y: y };
     return newAnchor;
 };

@@ -1,4 +1,3 @@
-
 // JavaScript Document
 "use strict";
 
@@ -73,13 +72,13 @@ TileField.prototype.handleTouchInput = function(delta) {
 };
 
 TileField.prototype.getTileXCoordinate = function(tile) {
-    let x = tile.position.x / this.cellWidth;
+    let x = Math.floor(tile.position.x / this.cellWidth);
     //console.log(x);
     return x;
 };
 
 TileField.prototype.getTileYCoordinate = function(tile) {
-    let y = tile.position.y / this.cellHeight;
+    let y = Math.floor(tile.position.y / this.cellHeight);
     //console.log(y);
     return y;
 };
