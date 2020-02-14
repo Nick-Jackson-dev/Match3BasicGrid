@@ -14,7 +14,7 @@ var TileType = {
 //inherits from powerupjs.SpriteGameObject
 
 function Tile(sprite, tileTp, layer, id) {
-    powerupjs.SpriteGameObject.call(this, sprite, layer);
+    powerupjs.SpriteGameObject.call(this, sprite, layer, id);
     this.type = tileTp;
     this._tileSpeed = 280; // pixels/sec
     this.shift = 0; //Not sure if this is needed
@@ -48,13 +48,12 @@ Object.defineProperty(Tile.prototype, "yCoordinate", {
 });
 
 Tile.prototype.beStill = function() {
-    this.velocity = powerupjs.Vector2.zero;
+    this.position = this.parent.getAnchorPosition(this);
     this.falling = false;
     this.shiftingRight = false;
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
-    this.position = this.parent.getAnchorPosition(this);
 };
 
 Tile.prototype.isSolid = function() {
@@ -68,40 +67,41 @@ Tile.prototype.deleteTile = function() {
 Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
-    }
-    /* need to find out when to stop the tile falling and then add that tile to the new coordinates on the grid so matches can be found
-    if (this.collidesWith(this.nextTileDown())) {
-        this.falling = false;
-        var newAnchor = this.findAppropriateAnchor(this.nextTileDown());
-        var fallTime = this.getFallTime() * 1000;
-        console.log("Fall time : " + fallTime);
-        setTimeout(function(tile) {
-            console.log("old anchor - x : " + tile.xCoordinate + " y : " + tile.yCoordinate);
-            console.log("new anchor - x: " + newAnchor.x + " y : " + newAnchor.y + "-");
-            tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
-            tile.beStill();
-        }, fallTime, this);
-    }*/
-
-    if (this.shiftingLeft) {
-        this.velocity.x = -this.tileSpeed;
-    } else if (this.shiftingRight) {
-        this.velocity.x = this.tileSpeed;
-    } else if (this.shiftingUp) {
-        this.velocity.y = -this.tileSpeed;
-    } else if (this.shiftingDown) {
+    } 
+    if(this.velocity.y > this.tileSpeed) {
         this.velocity.y = this.tileSpeed;
-    } else if (this.falling) {
-        this.velocity.y = this.tileSpeed;
-    } else {
-        this.velocity.x = 0;
-        this.velocity.y = 0;
     }
     powerupjs.SpriteGameObject.prototype.update.call(this, delta);
+    if (this.shiftingLeft) {
+        this.velocity.x = -this.tileSpeed;
+        return;
+    } else if (this.shiftingRight) {
+        this.velocity.x = this.tileSpeed;
+        return;
+    } else if (this.shiftingUp) {
+        this.velocity.y = -this.tileSpeed;
+        return;
+    } else if (this.shiftingDown) {
+        this.velocity.y = this.tileSpeed;
+        return;
+    } 
+
+     //need to find out when to stop the tile falling and then add that tile to the new coordinates on the grid so matches can be found
+    if (this.collidesWith(this.nextTileDown()) && !this.nextTileDown().falling && this.falling) {
+        this.falling = false;
+        //need to add the tile to the grid at new position
+        var newAnchor = this.findAppropriateAnchor();
+    }
+    if (this.falling) {
+        this.velocity.y = this.tileSpeed;
+    } else {
+        this.velocity.y = 0;
+        //this.beStill();
+    }
 };
 
 Tile.prototype.draw = function() {
-    if (this.type === TileType.background || this.type === TileType.deleted)
+    if (this.type === TileType.background || this.type === TileType.deleted || this.type === TileType.empty)
         return;
     powerupjs.SpriteGameObject.prototype.draw.call(this);
 };
@@ -124,9 +124,9 @@ Tile.prototype.getFallTime = function() {
     return distance / this.tileSpeed;
 };
 
-Tile.prototype.findAppropriateAnchor = function(tile) {
+Tile.prototype.findAppropriateAnchor = function() {
     //let tiles = this.parent;
-    let x = tile.xCoordinate;
-    let y = tile.yCoordinate + 1;
+    let x = this.xCoordinate;
+    let y = this.yCoordinate;
     return new powerupjs.Vector2(x, y);
 };

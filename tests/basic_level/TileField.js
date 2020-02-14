@@ -150,8 +150,8 @@ TileField.prototype.resolveMatches = function() {
 
     while (this.matches.length > 0) {
         this.removeMatches();
+        //this.checkFall();
         //this.shiftTiles();
-        this.checkFall();
         this.findMatches();
     }
 };
@@ -207,6 +207,9 @@ TileField.prototype.checkFall = function() {
         for (let j = this.rows - 2; j >= 0; j--) { //loop bottom to top
             if (!this.at(i, j + 1).isSolid() || this.at(i, j + 1).falling) {
                 this.at(i, j).falling = true;
+            } else {
+                this.at(i, j).falling = false;
+                this.resolveMatches();
             }
         }
     }
