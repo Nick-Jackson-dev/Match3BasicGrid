@@ -69,18 +69,18 @@ Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
     }
-    /*
-        if (this.collidesWith(this.nextTileDown()) && this.falling) {
-            this.falling = false;
-            var newAnchor = this.findAppropriateAnchor(this.nextTileDown());
-            var fallTime = this.getFallTime() * 1000;
-            console.log("Fall time : " + fallTime);
-            setTimeout(function(tile) {
-                console.log("old anchor - x : " + tile.xCoordinate + " y : " + tile.yCoordinate);
-                console.log("new anchor - x: " + newAnchor.x + " y : " + newAnchor.y + "-");
-                tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
-                tile.beStill();
-            }, fallTime, this);
+    /* need to find out when to stop the tile falling and then add that tile to the new coordinates on the grid so matches can be found
+    if (this.collidesWith(this.nextTileDown())) {
+        this.falling = false;
+        var newAnchor = this.findAppropriateAnchor(this.nextTileDown());
+        var fallTime = this.getFallTime() * 1000;
+        console.log("Fall time : " + fallTime);
+        setTimeout(function(tile) {
+            console.log("old anchor - x : " + tile.xCoordinate + " y : " + tile.yCoordinate);
+            console.log("new anchor - x: " + newAnchor.x + " y : " + newAnchor.y + "-");
+            tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
+            tile.beStill();
+        }, fallTime, this);
     }*/
 
     if (this.shiftingLeft) {
