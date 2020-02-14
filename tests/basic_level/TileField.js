@@ -1,4 +1,3 @@
-
 // JavaScript Document
 "use strict";
 
@@ -41,7 +40,6 @@ TileField.prototype.handleComputerInput = function(delta) {
                     }
                 } else {
                     this.selectTile(this.at(j, i));
-                    console.log(this.selected);
                 }
             }
         }
@@ -72,14 +70,19 @@ TileField.prototype.handleTouchInput = function(delta) {
     }
 };
 
+TileField.prototype.update = function(delta) {
+    powerupjs.GameObjectGrid.prototype.update.call(this, delta);
+    this.checkFall();
+};
+
 TileField.prototype.getTileXCoordinate = function(tile) {
-    let x = tile.position.x / this.cellWidth;
+    let x = Math.floor(tile.position.x / this.cellWidth);
     //console.log(x);
     return x;
 };
 
 TileField.prototype.getTileYCoordinate = function(tile) {
-    let y = tile.position.y / this.cellHeight;
+    let y = Math.floor(tile.position.y / this.cellHeight);
     //console.log(y);
     return y;
 };
@@ -147,6 +150,7 @@ TileField.prototype.resolveMatches = function() {
 
     while (this.matches.length > 0) {
         this.removeMatches();
+        //this.checkFall();
         //this.shiftTiles();
         this.findMatches();
     }
@@ -198,22 +202,15 @@ TileField.prototype.shiftTiles = function() {
     }
 };
 
-TileField.prototype.shiftTilesFall = function() {
+TileField.prototype.checkFall = function() {
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 2; j >= 0; j--) { //loop bottom to top
-            if (this.at(i, j + 1).type === TileType.deleted || this.at(i, j + 1).type === TileType.empty || !this.at(i, j + 1).isSolid()) {
-                var nextTile = this.nextTileDown(this.at(i, j));
+            if (!this.at(i, j + 1).isSolid() || this.at(i, j + 1).falling) {
                 this.at(i, j).falling = true;
             } else {
-                //console.log("no shift");
-                //swap tile to shift it
-                var shift = this.at(i, j).shift;
-                if (shift > 0) {
-                    this.swap(i, j, i, j + shift);
-                }
+                this.at(i, j).falling = false;
+                this.resolveMatches();
             }
-            //reset shift
-            this.at(i, j).shift = 0;
         }
     }
 };

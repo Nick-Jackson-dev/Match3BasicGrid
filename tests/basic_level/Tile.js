@@ -1,7 +1,6 @@
 // JavaScript Document
 "use strict";
 
-//NEEDS BIG REPORK IF IT IS EVEN NECESSARY
 
 var TileType = {
     background: 0,
@@ -15,7 +14,7 @@ var TileType = {
 //inherits from powerupjs.SpriteGameObject
 
 function Tile(sprite, tileTp, layer, id) {
-    powerupjs.SpriteGameObject.call(this, sprite, layer);
+    powerupjs.SpriteGameObject.call(this, sprite, layer, id);
     this.type = tileTp;
     this._tileSpeed = 280; // pixels/sec
     this.shift = 0; //Not sure if this is needed
@@ -49,83 +48,85 @@ Object.defineProperty(Tile.prototype, "yCoordinate", {
 });
 
 Tile.prototype.beStill = function() {
-    this.velocity = powerupjs.Vector2.zero;
+    this.position = this.parent.getAnchorPosition(this);
     this.falling = false;
     this.shiftingRight = false;
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
-    this.position = this.parent.getAnchorPosition(this);
 };
 
-Tile.prototype.isSolid = function () {
+Tile.prototype.isSolid = function() {
     return this.type === TileType.basic || this.type === TileType.special || !this.moveable;
 };
 
-Tile.prototype.deleteTile = function () {
+Tile.prototype.deleteTile = function() {
     this.type = TileType.deleted;
 };
 
 Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
-    }
-
-    /*if(this.collidesWith(this.nextTileDown()) && this.falling) {
-        this.falling = false;
-        var newAnchor = this.findAppropriateAnchor();
-        var fallTime = this.getFallTime
-        setTimeout(function (tile) {
-            tile.parent.addAt(tile, newAnchor.x, newAnchor.y);
-            tile.beStill();
-        }, fallTime, (this))
-        this.beStill();
-    }*/
-
-    if (this.shiftingLeft) {
-        this.velocity.x = -this.tileSpeed;
-    } else if (this.shiftingRight) {
-        this.velocity.x = this.tileSpeed;
-    } else if (this.shiftingUp) {
-        this.velocity.y = -this.tileSpeed;
-    } else if (this.shiftingDown) {
+    } 
+    if(this.velocity.y > this.tileSpeed) {
         this.velocity.y = this.tileSpeed;
-    } else if (this.falling) {
-        this.velocity.y = this.tileSpeed;
-    } else {
-        this.velocity.x = 0;
-        this.velocity.y = 0;
     }
     powerupjs.SpriteGameObject.prototype.update.call(this, delta);
+    if (this.shiftingLeft) {
+        this.velocity.x = -this.tileSpeed;
+        return;
+    } else if (this.shiftingRight) {
+        this.velocity.x = this.tileSpeed;
+        return;
+    } else if (this.shiftingUp) {
+        this.velocity.y = -this.tileSpeed;
+        return;
+    } else if (this.shiftingDown) {
+        this.velocity.y = this.tileSpeed;
+        return;
+    } 
+
+     //need to find out when to stop the tile falling and then add that tile to the new coordinates on the grid so matches can be found
+    if (this.collidesWith(this.nextTileDown()) && !this.nextTileDown().falling && this.falling) {
+        this.falling = false;
+        //need to add the tile to the grid at new position
+        var newAnchor = this.findAppropriateAnchor();
+    }
+    if (this.falling) {
+        this.velocity.y = this.tileSpeed;
+    } else {
+        this.velocity.y = 0;
+        //this.beStill();
+    }
 };
 
 Tile.prototype.draw = function() {
-    if (this.type === TileType.background || this.type === TileType.deleted)
+    if (this.type === TileType.background || this.type === TileType.deleted || this.type === TileType.empty)
         return;
     powerupjs.SpriteGameObject.prototype.draw.call(this);
 };
 
-Tile.prototype.nextTileDown = function () {
+Tile.prototype.nextTileDown = function() {
     var tiles = this.parent;
-    var currentRow = this.yCoordninate - 1;
-    var column = this.xCoordinate - 1;
-    for(let i = currentRow; i < tiles.rows; i++) {
-        if(tiles.at(column, i).isSolid()){
-            return tiles.at(column, 1);
+    var currentRow = this.yCoordinate;
+    var column = this.xCoordinate;
+    for (let i = currentRow; i < tiles.rows; i++) {
+        if (tiles.at(column, i) !== null && tiles.at(column, i).isSolid()) {
+            return tiles.at(column, i);
         }
     }
-    return;
+    return false;
 };
 
-Tile.prototype.getFallTime = function () {
-    let distance = this.yCoordinate - this.nextTileDown().yCoordinate;
+Tile.prototype.getFallTime = function() {
+    let distance = -(this.yCoordinate - this.nextTileDown().yCoordinate);
+    console.log(distance);
     return distance / this.tileSpeed;
 };
 
-Tile.prototype.findAppropriateAnchor = function () {
+Tile.prototype.findAppropriateAnchor = function() {
     //let tiles = this.parent;
-    let x = Math.floor(this.position.x / this.width);
-    let y = Math.floor(this.position.y / this.height);
-    let newAnchor = {x: x, y: y};
-    return newAnchor;
+    let x = this.xCoordinate;
+    let y = this.yCoordinate;
+    return new powerupjs.Vector2(x, y);
 };
