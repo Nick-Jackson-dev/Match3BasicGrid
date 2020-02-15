@@ -48,12 +48,12 @@ Object.defineProperty(Tile.prototype, "yCoordinate", {
 });
 
 Tile.prototype.beStill = function() {
-    this.position = this.parent.getAnchorPosition(this);
     this.falling = false;
     this.shiftingRight = false;
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
+    this.position = this.parent.getAnchorPosition(this);
 };
 
 Tile.prototype.isSolid = function() {
@@ -67,37 +67,23 @@ Tile.prototype.deleteTile = function() {
 Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
-    } 
-    if(this.velocity.y > this.tileSpeed) {
-        this.velocity.y = this.tileSpeed;
     }
-    powerupjs.SpriteGameObject.prototype.update.call(this, delta);
+
     if (this.shiftingLeft) {
         this.velocity.x = -this.tileSpeed;
-        return;
     } else if (this.shiftingRight) {
         this.velocity.x = this.tileSpeed;
-        return;
     } else if (this.shiftingUp) {
         this.velocity.y = -this.tileSpeed;
-        return;
     } else if (this.shiftingDown) {
         this.velocity.y = this.tileSpeed;
-        return;
-    } 
-
-     //need to find out when to stop the tile falling and then add that tile to the new coordinates on the grid so matches can be found
-    if (this.collidesWith(this.nextTileDown()) && !this.nextTileDown().falling && this.falling) {
-        this.falling = false;
-        //need to add the tile to the grid at new position
-        var newAnchor = this.findAppropriateAnchor();
-    }
-    if (this.falling) {
+    } else if (this.falling) {
         this.velocity.y = this.tileSpeed;
     } else {
-        this.velocity.y = 0;
-        //this.beStill();
+        this.velocity = powerupjs.Vector2.zero;
     }
+    //some things from V1.2 deleted from this area and this method reorganized
+    powerupjs.SpriteGameObject.prototype.update.call(this, delta);
 };
 
 Tile.prototype.draw = function() {
@@ -106,6 +92,7 @@ Tile.prototype.draw = function() {
     powerupjs.SpriteGameObject.prototype.draw.call(this);
 };
 
+/* may need deleted:  - part of V1.2
 Tile.prototype.nextTileDown = function() {
     var tiles = this.parent;
     var currentRow = this.yCoordinate;
@@ -129,4 +116,4 @@ Tile.prototype.findAppropriateAnchor = function() {
     let x = this.xCoordinate;
     let y = this.yCoordinate;
     return new powerupjs.Vector2(x, y);
-};
+};*/

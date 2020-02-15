@@ -72,7 +72,7 @@ TileField.prototype.handleTouchInput = function(delta) {
 
 TileField.prototype.update = function(delta) {
     powerupjs.GameObjectGrid.prototype.update.call(this, delta);
-    this.checkFall();
+    //this.checkFall(); //this may need deleted  - part of V1.2
 };
 
 TileField.prototype.getTileXCoordinate = function(tile) {
@@ -150,8 +150,8 @@ TileField.prototype.resolveMatches = function() {
 
     while (this.matches.length > 0) {
         this.removeMatches();
-        //this.checkFall();
-        //this.shiftTiles();
+        //this.checkFall();//this may need deleted  - part of V1.2
+        this.shiftTiles();
         this.findMatches();
     }
 };
@@ -202,6 +202,7 @@ TileField.prototype.shiftTiles = function() {
     }
 };
 
+/* this may not be used - part of V1.2
 TileField.prototype.checkFall = function() {
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 2; j >= 0; j--) { //loop bottom to top
@@ -213,7 +214,7 @@ TileField.prototype.checkFall = function() {
             }
         }
     }
-};
+};*/
 
 TileField.prototype.loopMatches = function() {
     for (var i = this.matches.length - 1; i >= 0; i--) {
@@ -238,16 +239,7 @@ TileField.prototype.lookAtMatch = function(column, row) {
 
 //swaps the type of 2 tiles - used for finding moves
 TileField.prototype.typeSwap = function(x1, y1, x2, y2) {
-    if (this.at(x1, y1) == null && this.at(x2, y2) == null) {
-        //console.log("x1: " + x1 + " , y1: " + y1 + " x2: " + x2 + " , y2: " + y2);
-        return;
-    }
-    if (this.at(x1, y1) == null) {
-        console.log("x1: " + x1 + " , y1: " + y1);
-        return;
-    }
-    if (this.at(x2, y2) == null) {
-        //console.log("x2: " + x2 + " , y2: " + y2);
+    if (this.at(x1, y1) == null || this.at(x2, y2) == null) {
         return;
     }
     var swap = this.at(x1, y1);
@@ -255,15 +247,9 @@ TileField.prototype.typeSwap = function(x1, y1, x2, y2) {
     this.addAt(swap2, x1, y1);
     this.addAt(swap, x2, y2);
 };
-//swapping with no animation for loading of TileFields
+//swapping with no animation - for loading of TileFields
 TileField.prototype.swap = function(x1, y1, x2, y2) {
-    if (this.at(x1, y1) == null && this.at(x2, y2) == null) {
-        return;
-    }
-    if (this.at(x1, y1) == null) {
-        return;
-    }
-    if (this.at(x2, y2) == null) {
+    if (this.at(x1, y1) == null || this.at(x2, y2) == null) {
         return;
     }
     var swap = this.at(x1, y1);
@@ -272,7 +258,7 @@ TileField.prototype.swap = function(x1, y1, x2, y2) {
     this.addAt(swap, x2, y2);
 };
 
-//this one should have animation tied in someway; cannot get to work yet
+//this swaps tile and has transition animation
 TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swapBack = typeof swapBack !== 'undefined' ? swapBack : false;
     if (tile1 == null || tile2 == null || !tile1.moveable || !tile2.moveable) {
@@ -300,7 +286,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swap = tile1;
     var swap2 = tile2;
     setTimeout(function(tiles) {
-        var realTiles = tiles.parent;
+        var realTiles = tiles;
         realTiles.addAt(swap2, x1, y1);
         realTiles.addAt(swap, x2, y2);
         realTiles.at(x1, y1).beStill();
@@ -316,7 +302,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         } else if (!swapBack) {
             realTiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
-    }, 260, (this, tile1, tile2)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
+    }, 250, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
 };
 
 TileField.prototype.selectTile = function(tile) {
