@@ -162,6 +162,10 @@ TileField.prototype.findMoves = function() {
     this.findHorizontalMoves();
     this.findVerticalMoves();
     //console.log("there are " + this.moves.length + " moves you can make");
+    if (this.moves.length === 0) {
+        //this.shuffle();
+        //this.findMoves();
+    }
     this.matches = [];
 };
 
@@ -286,21 +290,17 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swap = tile1;
     var swap2 = tile2;
     setTimeout(function(tiles) {
-        var realTiles = tiles;
-        realTiles.addAt(swap2, x1, y1);
-        realTiles.addAt(swap, x2, y2);
-        realTiles.at(x1, y1).beStill();
-        realTiles.at(x2, y2).beStill();
-        realTiles.findMatches();
-        if (realTiles.matches.length > 0) {
-            realTiles.resolveMatches();
-            realTiles.deselect();
-            realTiles.findMoves();
-            if (realTiles.moves.length === 0) {
-                //realTiles.shuffle();
-            }
+        tiles.addAt(swap2, x1, y1);
+        tiles.addAt(swap, x2, y2);
+        tiles.at(x1, y1).beStill();
+        tiles.at(x2, y2).beStill();
+        tiles.findMatches();
+        if (tiles.matches.length > 0) {
+            tiles.resolveMatches();
+            tiles.deselect();
+            tiles.findMoves();
         } else if (!swapBack) {
-            realTiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
+            tiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
     }, 250, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
 };
