@@ -1,4 +1,3 @@
-
 // JavaScript Document
 "use strict"
 
@@ -10,7 +9,7 @@
 function Level(levelData, special) {
     powerupjs.GameObjectList.call(this);
 
-    this.special = typeof special !== 'undefined' ? this.special : false;
+    this.special = typeof special !== 'undefined' ? this.special : true;
     this.showMoves = false;
     this.dragging = false;
     this.levelData = levelData;
@@ -52,7 +51,7 @@ Level.prototype.handleTouchInput = function(delta) {
 
 //use tiles in level data to load the tilegrid
 Level.prototype.loadTiles = function() {
-    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, ID.tiles);
+    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.tiles);
     this.tiles.position = new powerupjs.Vector2(342, 61);
     this.add(this.tiles);
     this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.select_border);
