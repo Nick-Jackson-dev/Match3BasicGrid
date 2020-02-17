@@ -6,6 +6,8 @@
 function TileField(rows, columns, special, layer, id) {
     powerupjs.GameObjectGrid.call(this, rows, columns, layer, id);
     this.special = special;
+    this.straightVerticalMatches = []; //{column, row, length, horizontal}
+    this.straightHorizontalMatches = []; //{column, row, length, horizontal}
     this.straightMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
     this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
@@ -74,79 +76,16 @@ TileField.prototype.handleTouchInput = function(delta) {
 
 TileField.prototype.update = function(delta) {
     powerupjs.GameObjectGrid.prototype.update.call(this, delta);
+    this.resolveMatches(); //for later use when things spawn from spawners (maybe)
     //this.checkFall(); //this may need deleted  - part of V1.2
 };
 
 TileField.prototype.getTileXCoordinate = function(tile) {
-    let x = Math.floor(tile.position.x / this.cellWidth);
-    //console.log(x);
-    return x;
+    return Math.floor(tile.position.x / this.cellWidth);
 };
 
 TileField.prototype.getTileYCoordinate = function(tile) {
-    let y = Math.floor(tile.position.y / this.cellHeight);
-    //console.log(y);
-    return y;
-};
-
-//unsure whether this is needed actually
-TileField.prototype.getTileType = function(x, y) {
-    if (x < 0 || x >= this.columns)
-        return TileType.normal;
-    if (y < 0 || y >= this.rows)
-        return TileType.background;
-    return this.at(x, y).type;
-};
-
-TileField.prototype.checkValidSwap = function(tile) {
-    if (tile.type === TileType.special) {
-        return true;
-    } else if (tile === this.selected) {
-        return false;
-    } else if (tile.type === TileType.deleted || tile.type === TileType.background) {
-        console.log("deleted or background tile");
-        return false;
-    } else if (this.selected === undefined || this.selected == null) {
-        console.log("no selected tile");
-        return false;
-    } else {
-        return this.canSwap(tile, this.selected);
-    }
-};
-
-//check if the tile and the seleccted tile can swap (ie are adjacent)
-TileField.prototype.canSwap = function(tile, tile2) {
-    let x1 = tile.xCoordinate;
-    let y1 = tile.yCoordinate;
-    let x2 = tile2.xCoordinate;
-    let y2 = tile2.yCoordinate;
-    if ((Math.abs(x1 - x2) == 1 && y1 == y2) || (Math.abs(y1 - y2) == 1 && x1 == x2)) {
-        return true;
-    }
-    console.log("cannot swap");
-    return false;
-};
-
-//swaps the tiles, stops taking input for touch or hold, then checks for matches and resolves, if no matches it swaps them back and makes the newly clicked one the selected tile
-TileField.prototype.handleSwap = function(tile) {
-    this.dragging = false;
-    this.swapTiles(tile, this.selected); //this has a timer for animation purposes
-};
-
-//takes into account special matches needed and then finds those then horizontal matches, then vertical matches
-TileField.prototype.findMatches = function() {
-    //matches array should be empty upon start
-    this.straightMatches = [];
-
-
-
-    this.findHorizontalMatches();
-    this.findVerticalMatches();
-    if (this.special) {
-        this.squareMatches = [];
-        this.intersectingMatches = [];
-        this.findSpecialMatches();
-    }
+    return Math.floor(tile.position.y / this.cellHeight);
 };
 
 //checks for clusters, adds them to an array and then removes the clusters and shifts cells until no clusters are left
@@ -160,6 +99,19 @@ TileField.prototype.resolveMatches = function() {
         this.findMatches();
     }
 };
+//takes into account special matches needed and then finds those then horizontal matches, then vertical matches
+TileField.prototype.findMatches = function() {
+    //matches array should be empty upon start
+    this.straightMatches = [];
+    this.findHorizontalMatches();
+    this.findVerticalMatches();
+    if (this.special) {
+        this.findSpecialMatches(); //finds long, extra long, T, L and Square matches and handles the insertion of the appropriate special tile
+    }
+    this.straightMatches = this.straightHorizontalMatches.concat(this.straightVerticalMatches);
+};
+
+
 
 //tries all avalable swaps the types of adjacent tiles to identify if there are moves
 TileField.prototype.findMoves = function() {
@@ -175,9 +127,9 @@ TileField.prototype.findMoves = function() {
 };
 
 TileField.prototype.removeMatches = function() {
-    this.loopMatches();
+    this.loopMatches();//looks at matches and deletes tiles
 
-    //calculate hoe much a tile should be shifted down
+    //calculate how much a tile should be shifted down based on whether tiles below are empty or deleted type
     for (var i = this.columns - 1; i >= 0; i--) {
         var shift = 0;
         for (var j = this.rows - 1; j >= 0; j--) {
@@ -228,10 +180,10 @@ TileField.prototype.checkFall = function() {
 TileField.prototype.loopMatches = function() {
     for (let i = this.squareMatches.length - 1; i >= 0; i--) {
         var square = this.squareMatches[i];
-        this.lookAtMatch(square.col, square.row);
-        this.lookAtMatch(square.col + 1, square.row);
-        this.lookAtMatch(square.col + 1, square.row + 1);
-        this.lookAtMatch(square.col, square.row + 1);
+        this.at(square.col, square.row).deleteTile();
+        this.at(square.col + 1, square.row).deleteTile();
+        this.at(square.col + 1, square.row + 1).deleteTile();
+        this.at(square.col, square.row + 1).deleteTile();
     }
     for (let i = this.straightMatches.length - 1; i >= 0; i--) {
         //column, row, length, horizontal
@@ -239,7 +191,7 @@ TileField.prototype.loopMatches = function() {
         var cOffset = 0;
         var rOffset = 0;
         for (let j = match.length - 1; j >= 0; j--) {
-            this.lookAtMatch(match.column + cOffset, match.row + rOffset);
+            this.at(match.column + cOffset, match.row + rOffset).deleteTile();
             if (match.horizontal) {
                 cOffset++;
             } else if (!match.horizontal) {
@@ -249,8 +201,38 @@ TileField.prototype.loopMatches = function() {
     }
 };
 
-TileField.prototype.lookAtMatch = function(column, row) {
-    this.at(column, row).deleteTile();
+TileField.prototype.checkValidSwap = function(tile) {
+    if (tile.type === TileType.special) {
+        return true;
+    } else if (tile === this.selected) {
+        return false;
+    } else if (tile.type === TileType.deleted || tile.type === TileType.background) {
+        console.log("deleted or background tile");
+        return false;
+    } else if (this.selected === undefined || this.selected == null) {
+        console.log("no selected tile");
+        return false;
+    } else {
+        return this.canSwap(tile, this.selected);
+    }
+};
+
+//check if the tile and the seleccted tile can swap (ie are adjacent)
+TileField.prototype.canSwap = function(tile, tile2) {
+    let x1 = tile.xCoordinate;
+    let y1 = tile.yCoordinate;
+    let x2 = tile2.xCoordinate;
+    let y2 = tile2.yCoordinate;
+    if ((Math.abs(x1 - x2) == 1 && y1 == y2) || (Math.abs(y1 - y2) == 1 && x1 == x2)) {
+        return true;
+    }
+    return false;
+};
+
+//swaps the tiles, stops taking input for touch or hold, then checks for matches and resolves, if no matches it swaps them back and makes the newly clicked one the selected tile
+TileField.prototype.handleSwap = function(tile) {
+    this.dragging = false;
+    this.swapTiles(tile, this.selected); //this has a timer for animation purposes
 };
 
 //swaps the type of 2 tiles - used for finding moves
@@ -370,6 +352,8 @@ TileField.prototype.findVerticalMoves = function() {
 };
 
 TileField.prototype.findSpecialMatches = function() {
+    this.squareMatches = [];
+    this.findVoidBombs();
     for (let i = 0, c = this.columns - 1; i < c; i++) {
         for (let j = 0, r = this.rows - 1; j < r; j++) {
             if (this.at(i, j).basicTileID === this.at(i + 1, j).basicTileID &&
@@ -383,6 +367,7 @@ TileField.prototype.findSpecialMatches = function() {
 
 //looks at rows top to bottom , left to right. records first one of match and length and stores it
 TileField.prototype.findHorizontalMatches = function() {
+    this.straightHorizontalMatches = [];
     for (let i = 0, r = this.rows; i < r; i++) {
         //start with a single tile
         let matchlength = 1;
@@ -405,7 +390,7 @@ TileField.prototype.findHorizontalMatches = function() {
             //if there was a match add it to the arary of matches starting with the first to the left and the matchlength and horizontal
             if (checkMatch) {
                 if (matchlength >= 3) {
-                    this.straightMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true });
+                    this.straightHorizontalMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true });
                 }
                 matchlength = 1;
             }
@@ -415,6 +400,7 @@ TileField.prototype.findHorizontalMatches = function() {
 
 //looks at columns top to bottom, and left to right. then stores the first of the match and the length into array
 TileField.prototype.findVerticalMatches = function() {
+    this.straightVerticalMatches = [];
     for (let i = 0, c = this.columns; i < c; i++) {
         //start with a single tile
         let matchlength = 1;
@@ -437,7 +423,7 @@ TileField.prototype.findVerticalMatches = function() {
             //if there was a match add it to the arary of matches starting with the first to the left and the matchlength and horizontal
             if (checkMatch) {
                 if (matchlength >= 3) {
-                    this.straightMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false });
+                    this.straightVerticalMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false });
                 }
                 matchlength = 1;
             }
@@ -449,3 +435,13 @@ TileField.prototype.findVerticalMatches = function() {
 //if two different matches share a tile, those matches intersect
 //send approprite info to intersectingMatches array (horizontal first)
 //delete the intersecting matches from the straightMatches array
+TileField.prototype.findVoidBombs = function () {
+    this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
+    var currHorizontal = null;
+    for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) {
+        currHorizontal = this.straightHorizontalMatches[i];
+        for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
+            
+        }
+    }
+};
