@@ -8,6 +8,7 @@ function TileField(rows, columns, special, layer, id) {
     this.special = special;
     this.straightMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
+    this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
     this.moves = []; //{colum1, row1, column2, row2}
 
     this.prevSelected = null;
@@ -143,6 +144,7 @@ TileField.prototype.findMatches = function() {
     this.findVerticalMatches();
     if (this.special) {
         this.squareMatches = [];
+        this.intersectingMatches = [];
         this.findSpecialMatches();
     }
 };
@@ -379,6 +381,7 @@ TileField.prototype.findSpecialMatches = function() {
     }
 };
 
+//looks at rows top to bottom , left to right. records first one of match and length and stores it
 TileField.prototype.findHorizontalMatches = function() {
     for (let i = 0, r = this.rows; i < r; i++) {
         //start with a single tile
@@ -410,6 +413,7 @@ TileField.prototype.findHorizontalMatches = function() {
     }
 };
 
+//looks at columns top to bottom, and left to right. then stores the first of the match and the length into array
 TileField.prototype.findVerticalMatches = function() {
     for (let i = 0, c = this.columns; i < c; i++) {
         //start with a single tile
@@ -440,3 +444,8 @@ TileField.prototype.findVerticalMatches = function() {
         }
     }
 };
+
+//look at straightMatches array, compare each match's involved tiles. 
+//if two different matches share a tile, those matches intersect
+//send approprite info to intersectingMatches array (horizontal first)
+//delete the intersecting matches from the straightMatches array
