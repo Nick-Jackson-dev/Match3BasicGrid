@@ -76,7 +76,8 @@ TileField.prototype.handleTouchInput = function(delta) {
 
 TileField.prototype.update = function(delta) {
     powerupjs.GameObjectGrid.prototype.update.call(this, delta);
-    this.resolveMatches(); //for later use when things spawn from spawners (maybe)
+    //this.removeMatches();
+    //this.shiftTiles(); //for later use when things spawn from spawners (maybe)
     //this.checkFall(); //this may need deleted  - part of V1.2
 };
 
@@ -92,7 +93,7 @@ TileField.prototype.getTileYCoordinate = function(tile) {
 TileField.prototype.resolveMatches = function() {
     this.findMatches();
 
-    while (this.straightMatches.length > 0 || this.squareMatches.length > 0) {
+    while (this.straightMatches.length > 0 || this.squareMatches.length > 0 || this.intersectingMatches.length > 0) {
         this.removeMatches();
         //this.checkFall();//this may need deleted  - part of V1.2
         this.shiftTiles();
@@ -127,7 +128,7 @@ TileField.prototype.findMoves = function() {
 };
 
 TileField.prototype.removeMatches = function() {
-    this.loopMatches();//looks at matches and deletes tiles
+    this.loopMatches(); //looks at matches and deletes tiles
 
     //calculate how much a tile should be shifted down based on whether tiles below are empty or deleted type
     for (var i = this.columns - 1; i >= 0; i--) {
@@ -178,6 +179,18 @@ TileField.prototype.checkFall = function() {
 };*/
 
 TileField.prototype.loopMatches = function() {
+    //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
+    for (let i = this.intersectingMatches.length - 1; i >= 0; i--) {
+        var crossMatch = this.intersectingMatches[i];
+        for (let j = 0, l = crossMatch.lengthHor - 1; j <= l; j++) {
+            this.at(crossMatch.columnHor + j, crossMatch.rowHor).deleteTile();
+        }
+        for (let j = 0, l = crossMatch.lengthVer - 1; j <= l; j++) {
+            //if (this.at(crossMatch.columnVer, crossMatch.rowVer + j) !== this.at(crossMatch.intersection.col, crossMatch.intersection.row)) {
+            this.at(crossMatch.columnVer, crossMatch.rowVer + j).deleteTile();
+            // }
+        }
+    }
     for (let i = this.squareMatches.length - 1; i >= 0; i--) {
         var square = this.squareMatches[i];
         this.at(square.col, square.row).deleteTile();
@@ -435,13 +448,39 @@ TileField.prototype.findVerticalMatches = function() {
 //if two different matches share a tile, those matches intersect
 //send approprite info to intersectingMatches array (horizontal first)
 //delete the intersecting matches from the straightMatches array
-TileField.prototype.findVoidBombs = function () {
+TileField.prototype.findVoidBombs = function() {
     this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
-    var currHorizontal = null;
+    var currHorizontalMatch = null;
+    var currVerticalMatch = null;
+    var currHorizontalTile = null;
+    var currVerticalTile = null;
     for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) {
-        currHorizontal = this.straightHorizontalMatches[i];
+        currHorizontalMatch = this.straightHorizontalMatches[i];
         for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
-            
+            currVerticalMatch = this.straightVerticalMatches[j];
+            for (let k = 0, m = currHorizontalMatch.length - 1; k < m; k++) {
+                currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
+                for (let t = 0, v = currVerticalMatch.length - 1; t < v; t++) {
+                    currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
+                    if (currHorizontalTile === currVerticalTile) {
+                        console.log("T or L match recognized");
+                        this.intersectingMatches.push({
+                            columnHor: currHorizontalMatch.column,
+                            rowHor: currHorizontalMatch.row,
+                            lengthHor: currHorizontalMatch.length,
+                            columnVert: currVerticalMatch.column,
+                            rowVert: currVerticalMatch.row,
+                            lengthVert: currVerticalMatch.length,
+                            intersection: { col: currHorizontalTile.xCoordinate, row: currHorizontalTile.yCoordinate }
+                        });
+                        this.straightHorizontalMatches.splice(i, 1);
+                        this.straightVerticalMatches.splice(j, 1);
+                    }
+                }
+            }
         }
+    }
+    if (this.intersectingMatches.length > 0) {
+        console.log(this.intersectingMatches[0]);
     }
 };
