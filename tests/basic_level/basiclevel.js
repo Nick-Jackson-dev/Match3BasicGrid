@@ -27,14 +27,19 @@ powerupjs.Game.loadAssets = function() {
     sprites.background_standard_tile_field = loadSprite("levels/standardTileBoard.png");
 
     //object sprites
+    //basic tiles
     sprites.basic_blue = loadSprite("tiles/basic_blue.png");
     sprites.basic_red = loadSprite("tiles/basic_red.png");
     sprites.basic_orange = loadSprite("tiles/basic_orange.png");
     sprites.basic_green = loadSprite("tiles/basic_green.png");
     sprites.basic_yellow = loadSprite("tiles/basic_yellow.png");
     sprites.basic_pink = loadSprite("tiles/basic_pink.png");
-
-    sprites.lazer = loadSprite("tiles/lazer.png");
+    //special tiles
+    sprites.lazer_horizontal = loadSprite("tiles/lazer_horizontal.png");
+    sprites.lazer_vertical = loadSprite("tiles/lazer_vertical.png");
+    sprites.homing_rocket = loadSprite("tiles/homing_rocket.png");
+    sprites.void_bomb = loadSprite("tiles/void_bomb.png");
+    sprites.multi_target = loadSprite("tiles/multi_target.png");
 
     sprites.selected_tile_overlay = loadSprite("levels/selected_tile_overlay.png");
 
