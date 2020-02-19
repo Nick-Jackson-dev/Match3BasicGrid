@@ -180,17 +180,21 @@ TileField.prototype.checkFall = function() {
 
 TileField.prototype.loopMatches = function() {
     //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
-    for (let i = this.intersectingMatches.length - 1; i >= 0; i--) {
+    for (let i =0, t = this.intersectingMatches.length - 1; i <= t; i++) {
+        console.log("in for loop");
         var crossMatch = this.intersectingMatches[i];
         for (let j = 0, l = crossMatch.lengthHor - 1; j <= l; j++) {
+            console.log("deleting " + (crossMatch.columnHor + j) + " , " + crossMatch.rowHor);
             this.at(crossMatch.columnHor + j, crossMatch.rowHor).deleteTile();
         }
-        for (let j = 0, l = crossMatch.lengthVer - 1; j <= l; j++) {
-            //if (this.at(crossMatch.columnVer, crossMatch.rowVer + j) !== this.at(crossMatch.intersection.col, crossMatch.intersection.row)) {
-            this.at(crossMatch.columnVer, crossMatch.rowVer + j).deleteTile();
-            // }
+        for (let j = 0, l = crossMatch.lengthVert - 1; j <= l; j++) {
+            //if(crossMatch.rowVert + j !== crossMatch.intersection.row){
+                console.log("deleting " + crossMatch.columnVert + " , " + (crossMatch.rowVert + j) );
+                this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
+            //}
         }
     }
+    
     for (let i = this.squareMatches.length - 1; i >= 0; i--) {
         var square = this.squareMatches[i];
         this.at(square.col, square.row).deleteTile();
@@ -301,7 +305,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tiles.at(x1, y1).beStill();
         tiles.at(x2, y2).beStill();
         tiles.findMatches();
-        if (tiles.straightMatches.length > 0 || tiles.squareMatches.length > 0) {
+        if (tiles.straightMatches.length > 0 || tiles.squareMatches.length > 0 || tiles.intersectingMatches.length > 0) {
             tiles.resolveMatches();
             tiles.deselect();
             tiles.findMoves();
@@ -458,9 +462,9 @@ TileField.prototype.findVoidBombs = function() {
         currHorizontalMatch = this.straightHorizontalMatches[i];
         for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
             currVerticalMatch = this.straightVerticalMatches[j];
-            for (let k = 0, m = currHorizontalMatch.length - 1; k < m; k++) {
+            for (let k = 0, m = currHorizontalMatch.length; k < m; k++) {
                 currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                for (let t = 0, v = currVerticalMatch.length - 1; t < v; t++) {
+                for (let t = 0, v = currVerticalMatch.length; t < v; t++) {
                     currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                     if (currHorizontalTile === currVerticalTile) {
                         console.log("T or L match recognized");
