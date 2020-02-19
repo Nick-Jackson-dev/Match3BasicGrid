@@ -32,7 +32,7 @@ powerupjs.Game.loadAssets = function() {
     sprites.basic_orange = loadSprite("tiles/basic_orange.png");
     sprites.basic_green = loadSprite("tiles/basic_green.png");
     sprites.basic_yellow = loadSprite("tiles/basic_yellow.png");
-    sprites.basic_pink = loadSprite("tiles/basci_pink.png");
+    sprites.basic_pink = loadSprite("tiles/basic_pink.png");
 
     sprites.lazer = loadSprite("tiles/lazer.png");
 
