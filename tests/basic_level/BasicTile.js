@@ -25,7 +25,7 @@ function BasicTile(tileType) {
         else if (this.basicTileID === 5)
             this.basicTileSprite = sprites.basic_yellow;
         else
-            this.basicTileSprite = sprites.lazer;
+            this.basicTileSprite = sprites.basic_pink;
     }
 
 
