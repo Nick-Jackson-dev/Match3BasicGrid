@@ -43,6 +43,12 @@ powerupjs.Game.loadAssets = function() {
 
     sprites.selected_tile_overlay = loadSprite("levels/selected_tile_overlay.png");
 
+    //playable characters for player
+    sprites.merman_left = loadSprite("characters/playable_characters/merman_left.png");
+
+    //mirrored characters
+    sprites.merman_right = loadSprite("characters/playable_characters/merman_right.png");
+
     //player sounds
 
     //other sounds
