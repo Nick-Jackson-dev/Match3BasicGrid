@@ -91,29 +91,3 @@ Tile.prototype.draw = function() {
         return;
     powerupjs.SpriteGameObject.prototype.draw.call(this);
 };
-
-/* may need deleted:  - part of V1.2
-Tile.prototype.nextTileDown = function() {
-    var tiles = this.parent;
-    var currentRow = this.yCoordinate;
-    var column = this.xCoordinate;
-    for (let i = currentRow; i < tiles.rows; i++) {
-        if (tiles.at(column, i) !== null && tiles.at(column, i).isSolid()) {
-            return tiles.at(column, i);
-        }
-    }
-    return false;
-};
-
-Tile.prototype.getFallTime = function() {
-    let distance = -(this.yCoordinate - this.nextTileDown().yCoordinate);
-    console.log(distance);
-    return distance / this.tileSpeed;
-};
-
-Tile.prototype.findAppropriateAnchor = function() {
-    //let tiles = this.parent;
-    let x = this.xCoordinate;
-    let y = this.yCoordinate;
-    return new powerupjs.Vector2(x, y);
-};*/

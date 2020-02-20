@@ -42,10 +42,18 @@
 
         //objects
         .script('Tile.js').wait()
+            //inherits from Tile./js
             .script('BasicTile.js').wait()
-            .script('TileField.js').wait()
-            .script('Level.js').wait()
-            .script('TimeTrialLevel.js').wait()
+            .script('SpecialTile.js').wait()
+                //Inherits from SpecialTile.js
+                .script('MultiTarget.js').wait()
+                .script('VerticalLazer.js').wait()
+                .script('HorizontalLazer.js').wait()
+                .script('HomingRocket.js').wait()
+                .script('VoidBomb.js').wait()
+        .script('TileField.js').wait()
+        .script('Level.js').wait()
+        .script('TimeTrialLevel.js').wait()
 
         //states
         .script('TestingBasicLevelState.js').wait()

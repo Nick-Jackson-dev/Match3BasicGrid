@@ -9,12 +9,19 @@
 function Level(levelData, special) {
     powerupjs.GameObjectList.call(this);
 
+    this.levelData = levelData;
+    this.playerData = undefined;//will look for player and use player data to display the player sprite and active/passive inventory
+    this.objectiveData = undefined;//certain levels will use this and it will be retrieved from level data - may not be necessary
+
     this.special = typeof special !== 'undefined' ? this.special : true;
     this.showMoves = false;
     this.dragging = false;
-    this.levelData = levelData;
-    //background would normally load elsewhere (upon going to level in the playingstate) based on the player location
+
+    this.cornerNav = undefined;//will hold the buttons for settings, exits, and help
+
+    //background would normally load based on player location (upon going to level in the playingstate) based on the player location
     this.add(new powerupjs.SpriteGameObject(sprites.background_charybdo_treasure_cave, ID.layer_background));
+    
     this.tileFieldHolder = new powerupjs.SpriteGameObject(sprites.background_standard_tile_field, ID.layer_background_1, ID.tile_field_holder);
     this.tileFieldHolder.origin = this.tileFieldHolder.center;
     this.tileFieldHolder.position = new powerupjs.Vector2(powerupjs.Game.size.x / 2, powerupjs.Game.size.y / 2);

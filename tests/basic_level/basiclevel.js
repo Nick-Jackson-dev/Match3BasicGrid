@@ -70,6 +70,7 @@ powerupjs.Game.initialize = function() {
     ID.layer_background_2 = 3;
     ID.layer_background_3 = 4;
     ID.layer_tiles = 10;
+    ID.layer_tiles_1 = 11;
     ID.layer_objects = 20;
     ID.layer_objects_1 = 21;
     ID.layer_objects_2 = 22;

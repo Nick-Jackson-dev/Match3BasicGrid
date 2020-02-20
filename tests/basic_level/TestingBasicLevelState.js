@@ -33,7 +33,7 @@ function TestingBasicLevelState() {
 
     this.loadLevels();
 
-    this.goToLevel(this.timeTrialLevels)
+    this.goToLevel(this.timeTrialLevels);//initialized just for test
 }
 
 TestingBasicLevelState.prototype = Object.create(powerupjs.IGameLoopObject.prototype);

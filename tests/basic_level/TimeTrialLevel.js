@@ -8,5 +8,9 @@
 
 function TimeTrialLevel(levelData) {
     Level.call(this, levelData, false);
+    
+    //var progressBar = new ProgressBar();//(beginning position, start position, rate of depletion modifier, rate of increase modifier) - modifiers from playerData
+
+    //this.timer = new Timer();//(startTime)
 }
 TimeTrialLevel.prototype = Object.create(Level.prototype);
