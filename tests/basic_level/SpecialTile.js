@@ -15,7 +15,7 @@ function SpecialTile (specialID) {
         this.specialTileSprite = sprites.multi_taget;
     } else if (this.specialTileID === 2)  {
         this.specialTileSprite = sprites.lazer_vertical;
-    } else if (specialTileID === 3) {
+    } else if (this.specialTileID === 3) {
         this.specialTileSprite = sprites.lazer_horizontal;
     } else if (this.specialTileID === 4) { 
         this.specialTileSprite = sprites.homing_rocket;

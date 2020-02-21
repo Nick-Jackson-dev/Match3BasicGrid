@@ -13,7 +13,7 @@ function BasicTile(tileType) {
         this.basicTileID = 10;
         this.basicTileSprite = sprites.basic_yellow;
     } else {
-        this.basicTileID = Math.floor(Math.random() * 6);
+        this.basicTileID = Math.floor(Math.random() * 5);
         if (this.basicTileID === 1)
             this.basicTileSprite = sprites.basic_blue;
         else if (this.basicTileID === 2)

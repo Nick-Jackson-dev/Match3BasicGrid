@@ -12,6 +12,7 @@ var TileType = {
 
 //Tile objects are initialized to normal 
 //inherits from powerupjs.SpriteGameObject
+//want to change inheritance to powerupjs.AnimatedGameObject once animations are made
 
 function Tile(sprite, tileTp, layer, id) {
     powerupjs.SpriteGameObject.call(this, sprite, layer, id);
