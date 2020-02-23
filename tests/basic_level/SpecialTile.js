@@ -8,16 +8,16 @@
 //they can also be activated without moving by selecting them then tapping/clicking them again.
 //eventually will be able to be combined for special actions.
 
-function SpecialTile (specialID) {
+function SpecialTile(specialID) {
     this.specialTileID = specialID;
     this.specialTileSprite = undefined;
-    if(this.specialTileID === 1) {
-        this.specialTileSprite = sprites.multi_taget;
-    } else if (this.specialTileID === 2)  {
+    if (this.specialTileID === 1) {
+        this.specialTileSprite = sprites.multi_target;
+    } else if (this.specialTileID === 2) {
         this.specialTileSprite = sprites.lazer_vertical;
     } else if (this.specialTileID === 3) {
         this.specialTileSprite = sprites.lazer_horizontal;
-    } else if (this.specialTileID === 4) { 
+    } else if (this.specialTileID === 4) {
         this.specialTileSprite = sprites.homing_rocket;
     } else if (this.specialTileID === 5) {
         this.specialTileSprite = sprites.void_bomb;

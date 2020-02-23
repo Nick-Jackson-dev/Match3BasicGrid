@@ -92,29 +92,30 @@ TileField.prototype.getTileYCoordinate = function(tile) {
 TileField.prototype.resolveMatches = function() {
     this.findMatches();
 
-    while (this.straightMatches.length > 0 || 
-            this.squareMatches.length > 0 || 
-            this.intersectingMatches.length > 0 || 
-            this.longMatches.length > 0 || 
-            this.extraLongMatches.length > 0) {
+    while (this.straightMatches.length > 0 ||
+        this.squareMatches.length > 0 ||
+        this.intersectingMatches.length > 0 ||
+        this.longMatches.length > 0 ||
+        this.extraLongMatches.length > 0) {
         this.removeMatches();
         this.shiftTiles();
         this.findMatches();
     }
 };
-//takes into account special matches needed and then finds those then horizontal matches, then vertical matches
+
 TileField.prototype.findMatches = function() {
     //matches array should be empty upon start
     this.straightMatches = [];
+    this.longMatches = [];
+    this.extraLongMatches = [];
     this.findHorizontalMatches();
     this.findVerticalMatches();
-    if (this.special) {
-        this.findSpecialMatches(); //finds long, extra long, T, L and Square matches and handles the insertion of the appropriate special tile
+    if (this.special) { //finds long, extra long, T, L and Square matches and handles the insertion of the appropriate special tile
+        this.findVoidBombs();
+        this.findHomingRockets();
     }
     this.straightMatches = this.straightHorizontalMatches.concat(this.straightVerticalMatches);
 };
-
-
 
 //tries all avalable swaps the types of adjacent tiles to identify if there are moves
 TileField.prototype.findMoves = function() {
@@ -123,6 +124,7 @@ TileField.prototype.findMoves = function() {
     this.findVerticalMoves();
     //console.log("there are " + this.moves.length + " moves you can make");
     if (this.moves.length === 0) {
+        console.log("no moves");
         //this.shuffle();
         //this.findMoves();
     }
@@ -153,10 +155,8 @@ TileField.prototype.shiftTiles = function() {
                 var t = new BasicTile(TileType.basic);
                 this.addAt(t, i, j);
             } else {
-                //console.log("no shift");
-                //swap tile to shift it
                 var shift = this.at(i, j).shift;
-                if (shift > 0) {
+                if (shift > 0) { //swap tile to shift it
                     //a set interval here may work if the remove matches is called at a different time and tiles are generated from top
                     this.swap(i, j, i, j + shift);
                 }
@@ -195,7 +195,7 @@ TileField.prototype.loopMatches = function() {
     }
 
     for (let i = this.longMatches.length - 1; i >= 0; i--) {
-        //column, row, length, horizontal, insertCol, insertRow
+        //column, row, length, horizontal, insertionPoint:{insertCol, insertRow}
         var match = this.longMatches[i];
         var cOffset = 0;
         var rOffset = 0;
@@ -207,37 +207,36 @@ TileField.prototype.loopMatches = function() {
                 rOffset++;
             }
         }
-        var Z = undefined;
-        if(match.horizontal) {
-            Z = new VerticalLazer();
+        if (match.horizontal) {
+            let Z = new VerticalLazer();
+            this.addAt(Z, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
         } else {
-            Z = new HorizontalLazer();
+            let Z = new HorizontalLazer();
+            this.addAt(Z, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
         }
-        this.addAt(Z, match.insertCol, match.insertRow);
     }
 
     //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
     for (let i = 0, t = this.intersectingMatches.length - 1; i <= t; i++) {
-        console.log("in for loop");
         var crossMatch = this.intersectingMatches[i];
         for (let j = 0, l = crossMatch.lengthHor - 1; j <= l; j++) {
-            console.log("deleting " + (crossMatch.columnHor + j) + " , " + crossMatch.rowHor);
             this.at(crossMatch.columnHor + j, crossMatch.rowHor).deleteTile();
         }
         for (let j = 0, l = crossMatch.lengthVert - 1; j <= l; j++) {
-            if(crossMatch.rowVert + j === crossMatch.intersection.row){
-                let B = new VoidBomb();
-                this.addAt(B ,crossMatch.columnVert, crossMatch.rowVert + j)
+            this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
+            if (crossMatch.rowVert + j === crossMatch.intersection.row) {
+                let VB = new VoidBomb();
+                this.addAt(VB, crossMatch.columnVert, crossMatch.rowVert + j)
             }
-            if(crossMatch.rowVert + j !== crossMatch.intersection.row){
-                console.log("deleting " + crossMatch.columnVert + " , " + (crossMatch.rowVert + j) );
-                this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
-            }
+            //if (crossMatch.rowVert + j !== crossMatch.intersection.row) {
+            //console.log("deleting " + crossMatch.columnVert + " , " + (crossMatch.rowVert + j));
+            //this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
+            //}
         }
     }
 
     for (let i = this.extraLongMatches.length - 1; i >= 0; i--) {
-        //column, row, length, horizontal, insertCol, insertRow
+        //column, row, length, horizontal, insertionPoint:{insertCol, insertRow}
         var match = this.extraLongMatches[i];
         var cOffset = 0;
         var rOffset = 0;
@@ -249,8 +248,8 @@ TileField.prototype.loopMatches = function() {
                 rOffset++;
             }
         }
-        var M = new MultiTarget();
-        this.addAt(M, match.insertCol, match.insertRow);
+        let M = new MultiTarget();
+        this.addAt(M, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
     }
 
 };
@@ -301,7 +300,6 @@ TileField.prototype.swap = function(x1, y1, x2, y2) {
 TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swapBack = typeof swapBack !== 'undefined' ? swapBack : false;
     if (tile1 == null || tile2 == null || !tile1.moveable || !tile2.moveable) {
-        console.log("tiles don't exist");
         return;
     }
     let x1 = tile1.xCoordinate;
@@ -329,11 +327,11 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tiles.at(x1, y1).beStill();
         tiles.at(x2, y2).beStill();
         tiles.findMatches();
-        if (tiles.straightMatches.length > 0 || 
-                tiles.squareMatches.length > 0 || 
-                tiles.intersectingMatches.length > 0 || 
-                tiles.longMatches.length > 0 || 
-                tiles.extraLongMatches.length > 0) {
+        if (tiles.straightMatches.length > 0 ||
+            tiles.squareMatches.length > 0 ||
+            tiles.intersectingMatches.length > 0 ||
+            tiles.longMatches.length > 0 ||
+            tiles.extraLongMatches.length > 0) {
             tiles.resolveMatches();
             tiles.deselect();
             tiles.findMoves();
@@ -344,13 +342,14 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
 };
 
 TileField.prototype.selectTile = function(tile) {
-    var selectBorder = this.root.find(ID.select_border);
-    if (tile.type === TileType.background) { // do not select background tiles
+    if (tile.type === TileType.background || tile === this.selected) { // do not select background tiles
         return;
     }
+    var selectBorder = this.root.find(ID.select_border);
     this.deselect();
     this.selected = tile;
     this.selected.ID = ID.selected_tile;
+    //console.log(this.selected);
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
@@ -366,20 +365,7 @@ TileField.prototype.deselect = function() {
     this.selected = null;
 };
 
-
-TileField.prototype.findSpecialMatches = function() {
-    this.findExtraLongMatches();
-    this.findVoidBombs();
-    this.findLongMatches();
-    this.findHomingRockets();
-    if(this.longMatches.length > 0 || this.extraLongMatches.length > 0) {
-        console.log("extraLong match length : " + this.extraLongMatches.length);
-        console.log("Long match length : " + this.longMatches.length);
-    };
-        
-};
-
-//look at straightMatches array, compare each match's involved tiles. 
+//look at straightHorizontalMatches and straightVerticalMatches array, compare each match's involved tiles. 
 //if two different matches share a tile, those matches intersect
 //send approprite info to intersectingMatches array (horizontal first)
 //delete the intersecting matches from the straightMatches array
@@ -389,128 +375,74 @@ TileField.prototype.findVoidBombs = function() {
     var currVerticalMatch = null;
     var currHorizontalTile = null;
     var currVerticalTile = null;
-    for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) {
-        currHorizontalMatch = this.straightHorizontalMatches[i];
-        for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
-            currVerticalMatch = this.straightVerticalMatches[j];
-            for (let k = 0, m = currHorizontalMatch.length; k < m; k++) {
-                currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                for (let t = 0, v = currVerticalMatch.length; t < v; t++) {
-                    currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
-                    if (currHorizontalTile === currVerticalTile) {
-                        console.log("T or L match recognized");
-                        this.intersectingMatches.push({
-                            columnHor: currHorizontalMatch.column,
-                            rowHor: currHorizontalMatch.row,
-                            lengthHor: currHorizontalMatch.length,
-                            columnVert: currVerticalMatch.column,
-                            rowVert: currVerticalMatch.row,
-                            lengthVert: currVerticalMatch.length,
-                            intersection: { col: currHorizontalTile.xCoordinate, row: currHorizontalTile.yCoordinate }
-                        });
-                        this.straightHorizontalMatches.splice(i, 1);
-                        this.straightVerticalMatches.splice(j, 1);
+    if (this.straightHorizontalMatches.length > 0 && this.straightVerticalMatches.length > 0) {
+        for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) {
+            currHorizontalMatch = this.straightHorizontalMatches[i];
+            for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
+                currVerticalMatch = this.straightVerticalMatches[j];
+                for (let k = 0, m = currHorizontalMatch.length; k < m; k++) {
+                    currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
+                    for (let t = 0, v = currVerticalMatch.length; t < v; t++) {
+                        currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
+                        if (currHorizontalTile === currVerticalTile) {
+                            this.intersectingMatches.push({
+                                columnHor: currHorizontalMatch.column,
+                                rowHor: currHorizontalMatch.row,
+                                lengthHor: currHorizontalMatch.length,
+                                columnVert: currVerticalMatch.column,
+                                rowVert: currVerticalMatch.row,
+                                lengthVert: currVerticalMatch.length,
+                                intersection: { col: currHorizontalTile.xCoordinate, row: currHorizontalTile.yCoordinate }
+                            });
+                            this.straightHorizontalMatches.splice(i, 1);
+                            this.straightVerticalMatches.splice(j, 1);
+                        }
                     }
                 }
             }
         }
     }
-    if (this.intersectingMatches.length > 0) {
-        console.log(this.intersectingMatches[0]);
-    }
 };
 
 TileField.prototype.findHomingRockets = function() {
     this.squareMatches = [];
-    var insertionPoint = {x: null, y:null};
+    var insertionPoint = { x: null, y: null };
     for (let i = 0, c = this.columns - 1; i < c; i++) {
         for (let j = 0, r = this.rows - 1; j < r; j++) {
             if (this.at(i, j).basicTileID === this.at(i + 1, j).basicTileID &&
                 this.at(i, j).basicTileID === this.at(i + 1, j + 1).basicTileID &&
                 this.at(i, j).basicTileID === this.at(i, j + 1).basicTileID) {
                 //check to see if one is selected and store it for insertion of homing rocket, add it to array and in loopMatches insert it
-                if(this.at(i, j) == this.selected || this.at(i, j) == this.prevSelected){
+                if (this.at(i, j) == this.selected || this.at(i, j) == this.prevSelected) {
                     insertionPoint.x = i;
                     insertionPoint.y = j;
-                } else if(this.at(i+1, j) == this.selected || this.at(i+1, j) == this.prevSelected){
-                    insertionPoint.x = i+1;
+                } else if (this.at(i + 1, j) == this.selected || this.at(i + 1, j) == this.prevSelected) {
+                    insertionPoint.x = i + 1;
                     insertionPoint.y = j;
-                } else if(this.at(i+1, j+1) == this.selected || this.at(i+1, j+1) == this.prevSelected){
-                    insertionPoint.x = i+1;
-                    insertionPoint.y = j+1;
-                }else if(this.at(i, j+1) == this.selected || this.at(i, j+1) == this.prevSelected){
+                } else if (this.at(i + 1, j + 1) == this.selected || this.at(i + 1, j + 1) == this.prevSelected) {
+                    insertionPoint.x = i + 1;
+                    insertionPoint.y = j + 1;
+                } else if (this.at(i, j + 1) == this.selected || this.at(i, j + 1) == this.prevSelected) {
                     insertionPoint.x = i;
-                    insertionPoint.y = j+1;
+                    insertionPoint.y = j + 1;
                 } else {
-                    insertionPoint.x = i+1;
-                    insertionPoint.y = j+1;
+                    insertionPoint.x = i + 1;
+                    insertionPoint.y = j + 1;
                 }
-                this.squareMatches.push({ col: i, row: j, insertionCol: insertionPoint.x, insertionRow: insertionPoint.y});//starting coords, insertion coords
+                this.squareMatches.push({ col: i, row: j, insertionCol: insertionPoint.x, insertionRow: insertionPoint.y }); //starting coords, insertion coords
             }
         }
     }
 };
-//find these first before long Matches, this happens beofre vertical and horizontal matches are combined
-TileField.prototype.findExtraLongMatches = function() {
-    this.extraLongMatches = [];//{column, row, length, horizontal, insertCol, InsertRow}
-    var currMatch = null;
-    for (let i = 0, l = this.straightHorizontalMatches.length - 1; i < l; i++){
-        currMatch = this.straightHorizontalMatches[i];
-        if(currMatch.length >= 5){
-            //go through match to find insertion point and set it in currMatch
-            currMatch.insertCol = currMatch.column;
-            currMatch.insertRow = currMatch.row;
-            this.extraLongMatches.push(currMatch);
-            this.straightHorizontalMatches.splice(i,1);
-            console.log("extra long match added");
-        }
-    }
-    for (let i = 0, l = this.straightVerticalMatches.length - 1; i < l; i++){
-        currMatch = this.straightVerticalMatches[i];
-        if(currMatch.length >= 5){
-            //go through match to find insertion point and set it in currMatch
-            currMatch.insertCol = currMatch.column;
-            currMatch.insertRow = currMatch.row;
-            this.extraLongMatches.push(currMatch);
-            this.straightVerticalMatches.splice(i, 1);
-            console.log("extra long match added");
-        }
-    }
-};
-
-TileField.prototype.findLongMatches = function() {
-    this.longMatches = [];//{column, row, length, horizontal, insertCol, InsertRow}
-    var currMatch = undefined;
-    for (let i = 0, l = this.straightHorizontalMatches.length - 1; i < l; i++){
-        currMatch = this.straightHorizontalMatches[i];
-        if(currMatch.length === 4){
-            //go through match to find insertion point and set it in currMatch
-            currMatch.insertCol = currMatch.column;
-            currMatch.insertRow = currMatch.row;
-            this.longMatches.push(currMatch);
-            this.straightHorizontalMatches.splice(i,1);
-            console.log("long match added");
-        }
-    }
-    for (let i = 0, l = this.straightVerticalMatches.length - 1; i < l; i++){
-        currMatch = this.straightVerticalMatches[i];
-        if(currMatch.length === 4){
-            //go through match to find insertion point and set it in currMatch
-            currMatch.insertCol = currMatch.column;
-            currMatch.insertRow = currMatch.row;
-            this.longMatches.push(currMatch);
-            this.straightVerticalMatches.splice(i,1);
-            console.log("long match added");
-        }
-    }
-};
-
 //looks at rows top to bottom , left to right. records first one of match and length and stores it
+//if the tilefield is special also finds the long and extra long matches
 TileField.prototype.findHorizontalMatches = function() {
     this.straightHorizontalMatches = [];
+    this.longMatches = [];
+    this.extraLongMatches = [];
     for (let i = 0, r = this.rows; i < r; i++) {
         //start with a single tile
-        let matchlength = 1;
+        var matchlength = 1;
         for (let j = 0, c = this.columns; j < c; j++) {
             //console.log("horizontal: " + this.at(j, i).type);
             let checkMatch = false;
@@ -530,7 +462,29 @@ TileField.prototype.findHorizontalMatches = function() {
             //if there was a match add it to the arary of matches starting with the first to the left and the matchlength and horizontal
             if (checkMatch) {
                 if (matchlength >= 3) {
-                    this.straightHorizontalMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true });
+                    if (this.special) {
+                        var insertionPoint = { insertCol: null, insertRow: null };
+                        if (matchlength >= 4) {
+                            for (let k = 0; k < matchlength - 1; k++) { //find where t o insert sepcial tile
+                                if (this.at(j + 1 - k, i) === this.selected || this.at(j + 1 - k, i) === this.prevSelected) {
+                                    insertionPoint.insertCol = (j + 1 - k);
+                                    insertionPoint.insertRow = i;
+                                } else {
+                                    insertionPoint.insertCol = (j + 1 - matchlength);
+                                    insertionPoint.insertRow = i;
+                                }
+                            }
+                        }
+                        if (matchlength === 4) {
+                            this.longMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true, insertionPoint: insertionPoint });
+                        } else if (matchlength >= 5) {
+                            this.extraLongMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true, insertionPoint: insertionPoint });
+                        } else {
+                            this.straightHorizontalMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true });
+                        }
+                    } else {
+                        this.straightHorizontalMatches.push({ column: j + 1 - matchlength, row: i, length: matchlength, horizontal: true });
+                    }
                 }
                 matchlength = 1;
             }
@@ -545,7 +499,7 @@ TileField.prototype.findVerticalMatches = function() {
     this.straightVerticalMatches = [];
     for (let i = 0, c = this.columns; i < c; i++) {
         //start with a single tile
-        let matchlength = 1;
+        var matchlength = 1;
         for (let j = 0, r = this.rows; j < r; j++) {
             //console.log("vertical: " + this.at(i, j).type);
             let checkMatch = false;
@@ -565,7 +519,29 @@ TileField.prototype.findVerticalMatches = function() {
             //if there was a match add it to the arary of matches starting with the first to the left and the matchlength and horizontal
             if (checkMatch) {
                 if (matchlength >= 3) {
-                    this.straightVerticalMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false });
+                    if (this.special) {
+                        var insertionPoint = { insertCol: null, insertRow: null };
+                        if (matchlength >= 4) {
+                            for (let k = 0; k < matchlength - 1; k++) { //find where t o insert sepcial tile
+                                if (this.at(i, j + 1 - k) === this.selected || this.at(i, j + 1 - k) === this.prevSelected) {
+                                    insertionPoint.insertCol = i;
+                                    insertionPoint.insertRow = (j + 1 - k);
+                                } else {
+                                    insertionPoint.insertCol = i;
+                                    insertionPoint.insertRow = (j + 1 - matchlength);
+                                }
+                            }
+                        }
+                        if (matchlength === 4) {
+                            this.longMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false, insertionPoint: insertionPoint });
+                        } else if (matchlength >= 5) {
+                            this.extraLongMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false, insertionPoint: insertionPoint });
+                        } else {
+                            this.straightVerticalMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false });
+                        }
+                    } else {
+                        this.straightVerticalMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false });
+                    }
                 }
                 matchlength = 1;
             }
