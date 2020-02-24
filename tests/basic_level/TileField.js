@@ -93,6 +93,8 @@ TileField.prototype.resolveMatches = function() {
     this.findMatches();
 
     while (this.straightMatches.length > 0 ||
+        this.straightVerticalMatches.length > 0 ||
+        this.straightHorizontalMatches.length > 0 ||
         this.squareMatches.length > 0 ||
         this.intersectingMatches.length > 0 ||
         this.longMatches.length > 0 ||
@@ -114,7 +116,7 @@ TileField.prototype.findMatches = function() {
         this.findVoidBombs();
         this.findHomingRockets();
     }
-    this.straightMatches = this.straightHorizontalMatches.concat(this.straightVerticalMatches);
+    //this.straightMatches = this.straightHorizontalMatches.concat(this.straightVerticalMatches);
 };
 
 //tries all avalable swaps the types of adjacent tiles to identify if there are moves
@@ -129,6 +131,8 @@ TileField.prototype.findMoves = function() {
         //this.findMoves();
     }
     this.straightMatches = [];
+    this.straightHorizontalMatches = [];
+    this.straightVerticalMatches = [];
 };
 
 TileField.prototype.removeMatches = function() {
@@ -169,9 +173,39 @@ TileField.prototype.shiftTiles = function() {
 
 //handles deleting tiles in matches and inserting special tiles if applicable
 TileField.prototype.loopMatches = function() {
-    for (let i = this.straightMatches.length - 1; i >= 0; i--) {
+    /*for (let i = this.straightMatches.length - 1; i >= 0; i--) {
         //column, row, length, horizontal
         var match = this.straightMatches[i];
+        var cOffset = 0;
+        var rOffset = 0;
+        for (let j = match.length - 1; j >= 0; j--) {
+            this.at(match.column + cOffset, match.row + rOffset).deleteTile();
+            if (match.horizontal) {
+                cOffset++;
+            } else if (!match.horizontal) {
+                rOffset++;
+            }
+        }
+    }*/
+
+    for (let i = this.straightHorizontalMatches.length - 1; i >= 0; i--) {
+        //column, row, length, horizontal
+        var match = this.straightHorizontalMatches[i];
+        var cOffset = 0;
+        var rOffset = 0;
+        for (let j = match.length - 1; j >= 0; j--) {
+            this.at(match.column + cOffset, match.row + rOffset).deleteTile();
+            if (match.horizontal) {
+                cOffset++;
+            } else if (!match.horizontal) {
+                rOffset++;
+            }
+        }
+    }
+
+    for (let i = this.straightVerticalMatches.length - 1; i >= 0; i--) {
+        //column, row, length, horizontal
+        var match = this.straightVerticalMatches[i];
         var cOffset = 0;
         var rOffset = 0;
         for (let j = match.length - 1; j >= 0; j--) {
@@ -251,7 +285,6 @@ TileField.prototype.loopMatches = function() {
         let M = new MultiTarget();
         this.addAt(M, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
     }
-
 };
 
 TileField.prototype.checkValidSwap = function(tile) {
@@ -328,6 +361,8 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tiles.at(x2, y2).beStill();
         tiles.findMatches();
         if (tiles.straightMatches.length > 0 ||
+            tiles.straightVerticalMatches.length > 0 ||
+            tiles.straightHorizontalMatches.length > 0 ||
             tiles.squareMatches.length > 0 ||
             tiles.intersectingMatches.length > 0 ||
             tiles.longMatches.length > 0 ||
@@ -349,7 +384,7 @@ TileField.prototype.selectTile = function(tile) {
     this.deselect();
     this.selected = tile;
     this.selected.ID = ID.selected_tile;
-    //console.log(this.selected);
+    console.log(this.selected);
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
@@ -556,7 +591,7 @@ TileField.prototype.findHorizontalMoves = function() {
             this.swap(j, i, j + 1, i);
             this.findMatches();
             this.typeSwap(j, i, j + 1, i);
-            if (this.straightMatches.length > 0) {
+            if (this.straightHorizontalMatches.length > 0) {
                 this.moves.push({ column1: j, row1: i, column2: j + 1, row2: i });
             }
         }
@@ -570,7 +605,7 @@ TileField.prototype.findVerticalMoves = function() {
             this.swap(j, i, j, i + 1);
             this.findMatches();
             this.typeSwap(j, i, j, i + 1);
-            if (this.straightMatches > 0) {
+            if (this.straightVerticalMatches.length > 0) {
                 this.moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
                 console.log("vertical - moves: " + this.moves.length);
             }

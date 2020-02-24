@@ -54,7 +54,7 @@ Tile.prototype.beStill = function() {
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
-    this.position = this.parent.getAnchorPosition(this);
+    //this.position = this.parent.getAnchorPosition(this);
 };
 
 Tile.prototype.isSolid = function() {
