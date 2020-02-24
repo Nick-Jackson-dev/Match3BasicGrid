@@ -8,7 +8,7 @@ function TileField(rows, columns, special, layer, id) {
     this.special = special;
     this.straightVerticalMatches = []; //{column, row, length, horizontal}
     this.straightHorizontalMatches = []; //{column, row, length, horizontal}
-    this.straightMatches = []; //{column, row, length, horizontal}
+    //this.straightMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
     this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
     this.longMatches = [];
@@ -92,7 +92,7 @@ TileField.prototype.getTileYCoordinate = function(tile) {
 TileField.prototype.resolveMatches = function() {
     this.findMatches();
 
-    while (this.straightMatches.length > 0 ||
+    while (//this.straightMatches.length > 0 ||
         this.straightVerticalMatches.length > 0 ||
         this.straightHorizontalMatches.length > 0 ||
         this.squareMatches.length > 0 ||
@@ -107,12 +107,16 @@ TileField.prototype.resolveMatches = function() {
 
 TileField.prototype.findMatches = function() {
     //matches array should be empty upon start
-    this.straightMatches = [];
+    //this.straightMatches = [];
+    this.straightHorizontalMatches = [];
+    this.straightVerticalMatches = [];
     this.longMatches = [];
     this.extraLongMatches = [];
     this.findHorizontalMatches();
     this.findVerticalMatches();
     if (this.special) { //finds long, extra long, T, L and Square matches and handles the insertion of the appropriate special tile
+        this.intersectingMatches = [];
+        this.squareMatches = [];
         this.findVoidBombs();
         this.findHomingRockets();
     }
@@ -384,7 +388,6 @@ TileField.prototype.selectTile = function(tile) {
     this.deselect();
     this.selected = tile;
     this.selected.ID = ID.selected_tile;
-    console.log(this.selected);
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
@@ -404,8 +407,7 @@ TileField.prototype.deselect = function() {
 //if two different matches share a tile, those matches intersect
 //send approprite info to intersectingMatches array (horizontal first)
 //delete the intersecting matches from the straightMatches array
-TileField.prototype.findVoidBombs = function() {
-    this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
+TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
     var currHorizontalMatch = null;
     var currVerticalMatch = null;
     var currHorizontalTile = null;
@@ -440,7 +442,6 @@ TileField.prototype.findVoidBombs = function() {
 };
 
 TileField.prototype.findHomingRockets = function() {
-    this.squareMatches = [];
     var insertionPoint = { x: null, y: null };
     for (let i = 0, c = this.columns - 1; i < c; i++) {
         for (let j = 0, r = this.rows - 1; j < r; j++) {
@@ -472,9 +473,6 @@ TileField.prototype.findHomingRockets = function() {
 //looks at rows top to bottom , left to right. records first one of match and length and stores it
 //if the tilefield is special also finds the long and extra long matches
 TileField.prototype.findHorizontalMatches = function() {
-    this.straightHorizontalMatches = [];
-    this.longMatches = [];
-    this.extraLongMatches = [];
     for (let i = 0, r = this.rows; i < r; i++) {
         //start with a single tile
         var matchlength = 1;
@@ -482,12 +480,12 @@ TileField.prototype.findHorizontalMatches = function() {
             //console.log("horizontal: " + this.at(j, i).type);
             let checkMatch = false;
             //check if the next tile is a background tile
-            if (j == c - 1 || this.at(j, i).type != TileType.basic) {
+            if (j === (c - 1) || this.at(j, i).type !== TileType.basic) {
                 //last tile or last tile before a background/special anyways
                 checkMatch = true;
             } else {
                 //check the type and basicID of next tile to see if it is in the match
-                if (this.at(j, i).type === TileType.basic && (this.at(j, i).basicTileID === this.at(j + 1, i).basicTileID)) {
+                if (this.at(j, i).basicTileID === this.at(j + 1, i).basicTileID) {
                     matchlength += 1;
                 } else {
                     //different type of tile
@@ -498,13 +496,14 @@ TileField.prototype.findHorizontalMatches = function() {
             if (checkMatch) {
                 if (matchlength >= 3) {
                     if (this.special) {
-                        var insertionPoint = { insertCol: null, insertRow: null };
+                        var insertionPoint = { insertCol: null, insertRow: null, set: false };
                         if (matchlength >= 4) {
-                            for (let k = 0; k < matchlength - 1; k++) { //find where t o insert sepcial tile
+                            for (let k = 0; k <= matchlength - 1; k++) { //find where to insert sepcial tile
                                 if (this.at(j + 1 - k, i) === this.selected || this.at(j + 1 - k, i) === this.prevSelected) {
                                     insertionPoint.insertCol = (j + 1 - k);
                                     insertionPoint.insertRow = i;
-                                } else {
+                                    insertionPoint.set = true;
+                                } else if(!insertionPoint.set){
                                     insertionPoint.insertCol = (j + 1 - matchlength);
                                     insertionPoint.insertRow = i;
                                 }
@@ -531,7 +530,6 @@ TileField.prototype.findHorizontalMatches = function() {
 
 //looks at columns top to bottom, and left to right. then stores the first of the match and the length into array
 TileField.prototype.findVerticalMatches = function() {
-    this.straightVerticalMatches = [];
     for (let i = 0, c = this.columns; i < c; i++) {
         //start with a single tile
         var matchlength = 1;
@@ -539,12 +537,12 @@ TileField.prototype.findVerticalMatches = function() {
             //console.log("vertical: " + this.at(i, j).type);
             let checkMatch = false;
             //check if the next tile is a background tile
-            if (j == r - 1 || this.at(j, i).type != TileType.basic) {
+            if (j == (r - 1) || this.at(i, j).type !== TileType.basic) {
                 //last tile or last tile before a background/special anyways
                 checkMatch = true;
             } else {
                 //check the type and basicID of next tile to see if it is in the match
-                if (this.at(i, j).type === TileType.basic && (this.at(i, j).basicTileID === this.at(i, j + 1).basicTileID)) {
+                if (this.at(i, j).basicTileID === this.at(i, j + 1).basicTileID) {
                     matchlength += 1;
                 } else {
                     //different type of tile
@@ -557,11 +555,12 @@ TileField.prototype.findVerticalMatches = function() {
                     if (this.special) {
                         var insertionPoint = { insertCol: null, insertRow: null };
                         if (matchlength >= 4) {
-                            for (let k = 0; k < matchlength - 1; k++) { //find where t o insert sepcial tile
+                            for (let k = 0; k <= matchlength - 1; k++) { //find where t o insert sepcial tile
                                 if (this.at(i, j + 1 - k) === this.selected || this.at(i, j + 1 - k) === this.prevSelected) {
                                     insertionPoint.insertCol = i;
                                     insertionPoint.insertRow = (j + 1 - k);
-                                } else {
+                                    break;
+                                } else{
                                     insertionPoint.insertCol = i;
                                     insertionPoint.insertRow = (j + 1 - matchlength);
                                 }
@@ -607,7 +606,6 @@ TileField.prototype.findVerticalMoves = function() {
             this.typeSwap(j, i, j, i + 1);
             if (this.straightVerticalMatches.length > 0) {
                 this.moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
-                console.log("vertical - moves: " + this.moves.length);
             }
         }
     }
