@@ -8,7 +8,6 @@ function TileField(rows, columns, special, layer, id) {
     this.special = special;
     this.straightVerticalMatches = []; //{column, row, length, horizontal}
     this.straightHorizontalMatches = []; //{column, row, length, horizontal}
-    //this.straightMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
     this.intersectingMatches = []; //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
     this.longMatches = [];
@@ -92,8 +91,7 @@ TileField.prototype.getTileYCoordinate = function(tile) {
 TileField.prototype.resolveMatches = function() {
     this.findMatches();
 
-    while (//this.straightMatches.length > 0 ||
-        this.straightVerticalMatches.length > 0 ||
+    while (this.straightVerticalMatches.length > 0 ||
         this.straightHorizontalMatches.length > 0 ||
         this.squareMatches.length > 0 ||
         this.intersectingMatches.length > 0 ||
@@ -107,7 +105,6 @@ TileField.prototype.resolveMatches = function() {
 
 TileField.prototype.findMatches = function() {
     //matches array should be empty upon start
-    //this.straightMatches = [];
     this.straightHorizontalMatches = [];
     this.straightVerticalMatches = [];
     this.longMatches = [];
@@ -120,7 +117,6 @@ TileField.prototype.findMatches = function() {
         this.findVoidBombs();
         this.findHomingRockets();
     }
-    //this.straightMatches = this.straightHorizontalMatches.concat(this.straightVerticalMatches);
 };
 
 //tries all avalable swaps the types of adjacent tiles to identify if there are moves
@@ -134,7 +130,6 @@ TileField.prototype.findMoves = function() {
         //this.shuffle();
         //this.findMoves();
     }
-    this.straightMatches = [];
     this.straightHorizontalMatches = [];
     this.straightVerticalMatches = [];
 };
@@ -161,16 +156,45 @@ TileField.prototype.shiftTiles = function() {
         for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
             if (this.at(i, j).type === TileType.deleted) {
                 var t = new BasicTile(TileType.basic);
-                this.addAt(t, i, j);
+                this.addAt(t, i, 0);
             } else {
                 var shift = this.at(i, j).shift;
                 if (shift > 0) { //swap tile to shift it
                     //a set interval here may work if the remove matches is called at a different time and tiles are generated from top
-                    this.swap(i, j, i, j + shift);
+                    var intervalTimer = this.at(i, j).tileSpeed / shift;
+                    //this.at(i, j).shifting = true;
+                    var intervalShifter = setInterval(function (tiles, col, row) {
+                        var column = col;
+                        var lastRow = null;
+                        var nowRow = row;
+                        //console.log(col + " " + nowRow);
+                        var drop = tiles.at(col, row).shift;
+                        var counter = 0;
+                        if(drop > 0) {
+                            console.log("in interval");
+                            //tiles.at(col, nowRow).falling = true;
+                            lastRow = nowRow;
+                            nowRow++;
+                            drop--;
+                            tiles.swapTiles(col, lastRow, col, nowRow);
+                            //tiles.at(col, lastRow).type = TileType.deleted;
+                        } else {
+                            console.log("elsing in interval");
+                            tiles.at(col, nowRow).beStill();
+                            //tiles.at(col, lastRow).beStill();
+                            tiles.at(col, nowRow).shift = 0;
+                            //tiles.removeMatches();
+                            tiles.shiftTiles();
+                            clearInterval(intervalShifter);
+                            return null;
+                        }
+                    },intervalTimer, this, i, j);
+
+                    //this.swap(i, j, i, j + shift);
                 }
             }
             //reset shift
-            this.at(i, j).shift = 0;
+            //this.at(i, j).shift = 0;
         }
     }
 };
@@ -346,8 +370,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tiles.at(x1, y1).beStill();
         tiles.at(x2, y2).beStill();
         tiles.findMatches();
-        if (tiles.straightMatches.length > 0 ||
-            tiles.straightVerticalMatches.length > 0 ||
+        if (tiles.straightVerticalMatches.length > 0 ||
             tiles.straightHorizontalMatches.length > 0 ||
             tiles.squareMatches.length > 0 ||
             tiles.intersectingMatches.length > 0 ||
