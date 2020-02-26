@@ -81,6 +81,7 @@ var powerupjs = (function (powerupjs) {
 
     GameObjectList.prototype.reset = function () {
         for (var i = 0, l = this._gameObjects.length; i < l; ++i){
+            //console.log(this._gameObjects[i]);
             this._gameObjects[i].reset();
 		}
     };

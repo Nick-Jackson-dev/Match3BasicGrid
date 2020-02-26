@@ -18,6 +18,7 @@ function Level(levelData, special) {
     this.dragging = false;
 
     this.cornerNav = undefined; //will hold the buttons for settings, exits, and help
+    this.selectBorder = undefined;
 
     //background would normally load based on player location (upon going to level in the playingstate) based on the player location
     this.add(new powerupjs.SpriteGameObject(sprites.background_charybdo_treasure_cave, ID.layer_background));
@@ -63,7 +64,7 @@ Level.prototype.loadTiles = function() {
     this.add(this.tiles);
     this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.select_border);
     this.selectBorder.position = new powerupjs.Vector2(-2000, -2000);
-    this.selectBorder.parent = this.tiles;
+    this.selectBorder.parent = this;
     this.add(this.selectBorder);
     var done = false;
 
