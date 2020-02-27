@@ -80,9 +80,9 @@ Level.prototype.loadTiles = function() {
             }
         }
         //reolve all matches upon loading
-        this.tiles.resolveMatches();
+        this.tiles.resolveMatches(true);
         //need to be able to make at least one move so find out if there are any moves
-        this.tiles.findMoves();
+        this.tiles.findMoves(true);
         //end loop
         if (this.tiles.moves.length > 0) {
             done = true;
