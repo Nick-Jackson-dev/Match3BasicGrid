@@ -17,7 +17,7 @@ var TileType = {
 function Tile(sprite, tileTp, layer, id) {
     powerupjs.SpriteGameObject.call(this, sprite, layer, id);
     this.type = tileTp;
-    this._tileSpeed = 280; // pixels/sec
+    this._tileSpeed = 300; // pixels/sec
     this.shift = 0; //Not sure if this is needed
     this.falling = false;
     this.moveable = true; // if not movable it doesn't fall even with nothing under it and can't be switched - not implemented yet

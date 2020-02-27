@@ -43,7 +43,7 @@ TileField.prototype.handleComputerInput = function(delta) {
                     this.prevSelected = this.selected;
                     this.selectTile(this.at(j, i));
                     if (this.checkValidSwap(this.prevSelected)) {
-                        this.handleSwap(this.prevSelected);
+                        this.swapTiles(this.prevSelected, this.selected);
                         powerupjs.Mouse.resetDown();
                     }
                 } else {
@@ -66,7 +66,7 @@ TileField.prototype.handleTouchInput = function(delta) {
                     this.prevSelected = this.selected;
                     this.selectTile(this.at(j, i));
                     if (this.checkValidSwap(this.prevSelected)) {
-                        this.handleSwap(this.prevSelected);
+                        this.swapTiles(this.prevSelected, this.selected);
                         powerupjs.Touch.reset();
                     }
                 } else {
@@ -184,13 +184,17 @@ TileField.prototype.shiftTilesFast = function() {
 };
 
 TileField.prototype.shiftTiles = function() {
+    this.shifting = false;
+    var intervalTimer = undefined;
+    //put basic tiles in place of deleted first row tiles 
+    //eventually this will only be if not special, if special first check for special spawner
     for (let i = 0, r = this.columns; i < r; i++) {
         if (this.at(i, 0).type === TileType.deleted) {
             this.addAt(new BasicTile(TileType.basic), i, 0);
+            this.shifting = true;
         }
     }
-
-    //see what needs a shift
+    //see what needs a shift based on deleted tiles
     for (var i = this.columns - 1; i >= 0; i--) {
         var shift = 0;
         for (var j = this.rows - 1; j >= 0; j--) {
@@ -203,30 +207,27 @@ TileField.prototype.shiftTiles = function() {
         }
     }
 
-    this.shifting = false;
+    //go one by one shifting tiles one down and reiterate loop if one shifts
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
             if (this.at(i, j).type === TileType.deleted) {
+                //deleted tiles will be assigned no shift
                 this.at(i, j).shift = 0;
-                //var t = new BasicTile(TileType.basic);
-                //this.addAt(t, i, 0);
             } else {
                 var shift = this.at(i, j).shift;
                 if (shift > 0) { //swap tile to shift it
                     this.shifting = true;
-                    //a set interval here may work if the remove matches is called at a different time and tiles are generated from top
-
-                    var intervalTimer = this.at(i, j).tileSpeed / shift;
+                    //setTimeout for animation, initiate falling
+                    intervalTimer = (this.cellHeight/this.at(i, j).tileSpeed) * 1000;
                     this.at(i, j).falling = true;
                     setTimeout(function(tiles, col, row) {
                         tiles.at(col, row).shift -= 1;
                         tiles.swap(col, row, col, row + 1);
                         if (tiles.at(col, row + 1).shift <= 0) {
-                            //tiles.at(col, row + 1).beStill();
                             tiles.at(col, row + 1).falling = false;
                             tiles.at(col, row + 1).shift = 0;
                         }
-                    }, intervalTimer - 50, this, i, j);
+                    }, intervalTimer, this, i, j);
                 }
             }
         }
@@ -242,13 +243,15 @@ TileField.prototype.shiftTiles = function() {
                 tiles.intersectingMatches.length > 0 ||
                 tiles.longMatches.length > 0 ||
                 tiles.extraLongMatches.length > 0) {
-                tiles.loopMatches();
-                tiles.shiftTiles();
+                    setTimeout(function(tiles){
+                        tiles.loopMatches();
+                        tiles.shiftTiles();
+                    }, 100, tiles);//provides the little delay when matches are made from tiles falling into place
             } else {
                 return;
             }
         }
-    }, intervalTimer + 1, this);
+    }, (intervalTimer + 1), this);//be sure this calls after the last timeout, should this go in the last setTimeOut?
 
 };
 
@@ -371,23 +374,7 @@ TileField.prototype.checkValidSwap = function(tile) {
     }
 };
 
-//swaps the tiles, stops taking input for touch or hold, then checks for matches and resolves, if no matches it swaps them back and makes the newly clicked one the selected tile
-TileField.prototype.handleSwap = function(tile) {
-    this.dragging = false;
-    this.swapTiles(tile, this.selected); //this has a timer for animation purposes
-};
-
-//swaps the type of 2 tiles - used for finding moves
-TileField.prototype.typeSwap = function(x1, y1, x2, y2) {
-    if (this.at(x1, y1) == null || this.at(x2, y2) == null) {
-        return;
-    }
-    var swap = this.at(x1, y1);
-    var swap2 = this.at(x2, y2);
-    this.addAt(swap2, x1, y1);
-    this.addAt(swap, x2, y2);
-};
-//swapping with no animation - for loading of TileFields
+//swapping with no animation - for loading of TileFields, finding moves, and falling tiles
 TileField.prototype.swap = function(x1, y1, x2, y2) {
     if (this.at(x1, y1) == null || this.at(x2, y2) == null) {
         return;
@@ -398,9 +385,11 @@ TileField.prototype.swap = function(x1, y1, x2, y2) {
     this.addAt(swap, x2, y2);
 };
 
-//this swaps tile and has transition animation
+//this swaps tile and has transition animation for when the player actively switches tiles
+//if it is a swapback no moves are looked for
 TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
     var swapBack = typeof swapBack !== 'undefined' ? swapBack : false;
+    this.dragging = false;
     if (tile1 == null || tile2 == null || !tile1.moveable || !tile2.moveable) {
         return;
     }
@@ -421,6 +410,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tile1.shiftingDown = true;
         tile2.shiftingUp = true;
     }
+    var timerset = (this.cellWidth/tile1.tileSpeed) * 1000;
     var swap = tile1;
     var swap2 = tile2;
     setTimeout(function(tiles) {
@@ -441,7 +431,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         } else if (!swapBack) {
             tiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
-    }, 250, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
+    }, timerset, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
 };
 
 TileField.prototype.selectTile = function(tile) {
@@ -452,7 +442,7 @@ TileField.prototype.selectTile = function(tile) {
     this.deselect();
     this.selected = tile;
     this.selected.ID = ID.selected_tile;
-    console.log(this.selected);
+    //console.log(this.selected);
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
@@ -473,17 +463,21 @@ TileField.prototype.deselect = function() {
 //send approprite info to intersectingMatches array (horizontal first)
 //delete the intersecting matches from the straightMatches array
 TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer}
-    var currHorizontalMatch = null;
-    var currVerticalMatch = null;
-    var currHorizontalTile = null;
-    var currVerticalTile = null;
     if (this.straightHorizontalMatches.length > 0 && this.straightVerticalMatches.length > 0) {
+        var currHorizontalMatch = null;
+        var currVerticalMatch = null;
+        var currHorizontalTile = null;
+        var currVerticalTile = null;
         for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) {
             currHorizontalMatch = this.straightHorizontalMatches[i];
             for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
                 currVerticalMatch = this.straightVerticalMatches[j];
                 for (let k = 0, m = currHorizontalMatch.length; k < m; k++) {
+                    if(currVerticalTile == 'undefined') {
+                        continue;
+                    }
                     currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
+                    console.log(currVerticalMatch);
                     for (let t = 0, v = currVerticalMatch.length; t < v; t++) {
                         currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                         if (currHorizontalTile === currVerticalTile) {
@@ -657,7 +651,7 @@ TileField.prototype.findHorizontalMoves = function(initializing) {
             //swap, find clusters then swap back
             this.swap(j, i, j + 1, i);
             this.findMatches(initializing);
-            this.typeSwap(j, i, j + 1, i);
+            this.swap(j, i, j + 1, i);
             if (this.straightHorizontalMatches.length > 0) {
                 this.moves.push({ column1: j, row1: i, column2: j + 1, row2: i });
             }
@@ -672,7 +666,7 @@ TileField.prototype.findVerticalMoves = function(initializing) {
             //swap, find clusters then swap back
             this.swap(j, i, j, i + 1);
             this.findMatches(initializing);
-            this.typeSwap(j, i, j, i + 1);
+            this.swap(j, i, j, i + 1);
             if (this.straightVerticalMatches.length > 0) {
                 this.moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
             }
