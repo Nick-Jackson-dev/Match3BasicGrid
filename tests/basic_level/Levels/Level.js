@@ -96,6 +96,21 @@ Level.prototype.loadTile = function(tileType, x, y) {
         case '?':
             console.log("added basic type");
             return this.loadBasicTile(TileType.basic);
+        case 'b': 
+            console.log("added VoidBomb");
+            return this.loadVoidBomb();
+        case 'r':
+            console.log("added HomingRocket");
+            return this.loadHomingRocket();
+        case 'm':
+            console.log("added MultiTarget");
+            return this.loadMultiTarget();
+        case 'h':
+            console.log("added HorizontalLazer");
+            return this.loadHorizontalLazer();
+        case 'v':
+            console.log("added VerticalLazer");
+            return this.loadVerticalLazer();
         default:
             return this.loadBasicTile(TileType.background);
     }
@@ -105,4 +120,28 @@ Level.prototype.loadTile = function(tileType, x, y) {
 Level.prototype.loadBasicTile = function(tileType) {
     var t = new BasicTile(tileType);
     return t;
+};
+
+Level.prototype.loadVoidBomb = function () {
+    var vb = new VoidBomb();
+    return vb;
+};
+
+Level.prototype.loadHomingRocket = function () {
+    var hr = new HomingRocket();
+    return hr;
+};
+
+Level.prototype.loadMultiTarget = function () {
+    var mt = new MultiTarget();
+    return mt;
+};
+
+Level.prototype.loadHorizontalLazer = function () {
+    var hl = new HorizontalLazer();
+    return hl;
+};
+Level.prototype.loadVerticalLazer = function () {
+    var vl = new VerticalLazer();
+    return vl;
 };

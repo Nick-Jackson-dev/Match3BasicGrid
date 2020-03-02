@@ -1,6 +1,11 @@
 /*LEGEND
 '.' = background/transparent tile
 '?' = random basic tile from sheet_index 0 to 4
+'b' = VoidBomb
+'h' = HorizontalLazer
+'v' = VertaicalLazer
+'m' = MultiTarget
+'r' = HomingRocket
 */
 
 var standardlevels = [];

@@ -41,22 +41,22 @@
         .script('standardgrid.js').wait()
 
         //objects
-        .script('Tile.js').wait()
+        .script('Tiles/Tile.js').wait()
             //inherits from Tile./js
-            .script('BasicTile.js').wait()
-            .script('SpecialTile.js').wait()
+            .script('Tiles/BasicTile.js').wait()
+            .script('Tiles/SpecialTile.js').wait()
                 //Inherits from SpecialTile.js
-                .script('MultiTarget.js').wait()
-                .script('VerticalLazer.js').wait()
-                .script('HorizontalLazer.js').wait()
-                .script('HomingRocket.js').wait()
-                .script('VoidBomb.js').wait()
+                .script('Tiles/MultiTarget.js').wait()
+                .script('Tiles/VerticalLazer.js').wait()
+                .script('Tiles/HorizontalLazer.js').wait()
+                .script('Tiles/HomingRocket.js').wait()
+                .script('Tiles/VoidBomb.js').wait()
         .script('TileField.js').wait()
-        .script('Level.js').wait()
-        .script('TimeTrialLevel.js').wait()
+        .script('Levels/Level.js').wait()
+        .script('Levels/TimeTrialLevel.js').wait()
 
         //states
-        .script('TestingBasicLevelState.js').wait()
+        .script('Gamestates/TestingBasicLevelState.js').wait()
 
         .script('basiclevel.js').wait(function() {
             powerupjs.Game.start('gameArea', 'mycanvas', 1280, 720);

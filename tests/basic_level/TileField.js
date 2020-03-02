@@ -2,6 +2,7 @@
 "use strict";
 
 //TileField will inhert from powerupjsGameObjectGrid and hold tiles in a grid determined by the parameters passed
+//handles behaviors of the grid and when those behaviors effect the tiles within it
 
 function TileField(rows, columns, special, layer, id) {
     powerupjs.GameObjectGrid.call(this, rows, columns, layer, id);
@@ -258,32 +259,6 @@ TileField.prototype.shiftTiles = function() {
 //handles deleting tiles in matches and inserting special tiles if applicable
 TileField.prototype.loopMatches = function(initializing) {
     var initializing = typeof initializing != 'undefined' ? initializing : false;
-    if (!initializing && this.special) {
-        for (let i = this.squareMatches.length - 1; i >= 0; i--) {
-            var square = this.squareMatches[i];
-            this.at(square.col, square.row).deleteTile();
-            this.at(square.col + 1, square.row).deleteTile();
-            this.at(square.col + 1, square.row + 1).deleteTile();
-            this.at(square.col, square.row + 1).deleteTile();
-            var HR = new HomingRocket();
-            this.addAt(HR, square.insertionCol, square.insertionRow);
-        }
-
-        //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
-        for (let i = 0, t = this.intersectingMatches.length - 1; i <= t; i++) {
-            var crossMatch = this.intersectingMatches[i];
-            for (let j = 0, l = crossMatch.lengthHor - 1; j <= l; j++) {
-                this.at(crossMatch.columnHor + j, crossMatch.rowHor).deleteTile();
-            }
-            for (let j = 0, l = crossMatch.lengthVert - 1; j <= l; j++) {
-                this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
-                if (crossMatch.rowVert + j === crossMatch.intersection.row) {
-                    let VB = new VoidBomb();
-                    this.addAt(VB, crossMatch.columnVert, crossMatch.rowVert + j)
-                }
-            }
-        }
-    }
 
     for (let i = this.straightHorizontalMatches.length - 1; i >= 0; i--) {
         //column, row, length, horizontal
@@ -316,6 +291,30 @@ TileField.prototype.loopMatches = function(initializing) {
     }
 
     if (!initializing && this.special) {
+        for (let i = this.squareMatches.length - 1; i >= 0; i--) {
+            var square = this.squareMatches[i];
+            this.at(square.col, square.row).deleteTile();
+            this.at(square.col + 1, square.row).deleteTile();
+            this.at(square.col + 1, square.row + 1).deleteTile();
+            this.at(square.col, square.row + 1).deleteTile();
+            var HR = new HomingRocket();
+            this.addAt(HR, square.insertionCol, square.insertionRow);
+        }
+
+        //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
+        for (let i = 0, t = this.intersectingMatches.length - 1; i <= t; i++) {
+            var crossMatch = this.intersectingMatches[i];
+            for (let j = 0, l = crossMatch.lengthHor - 1; j <= l; j++) {
+                this.at(crossMatch.columnHor + j, crossMatch.rowHor).deleteTile();
+            }
+            for (let j = 0, l = crossMatch.lengthVert - 1; j <= l; j++) {
+                this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
+                if (crossMatch.rowVert + j === crossMatch.intersection.row) {
+                    let VB = new VoidBomb();
+                    this.addAt(VB, crossMatch.columnVert, crossMatch.rowVert + j)
+                }
+            }
+        }
         for (let i = this.longMatches.length - 1; i >= 0; i--) {
             //column, row, length, horizontal, insertionPoint:{insertCol, insertRow}
             var match = this.longMatches[i];
@@ -477,7 +476,6 @@ TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor
                         continue;
                     }
                     currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                    console.log(currVerticalMatch);
                     for (let t = 0, v = currVerticalMatch.length; t < v; t++) {
                         currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                         if (currHorizontalTile === currVerticalTile) {
