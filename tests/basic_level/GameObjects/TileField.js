@@ -21,10 +21,10 @@ function TileField(rows, columns, special, layer, id) {
 TileField.prototype = Object.create(powerupjs.GameObjectGrid.prototype);
 
 TileField.prototype.handleInput = function(delta) {
+    powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
     if (this.shifting) {
         return;
     }
-    powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
     if (powerupjs.Touch.isTouchDevice) {
         this.handleTouchInput(delta);
     } else {
@@ -40,9 +40,13 @@ TileField.prototype.handleComputerInput = function(delta) {
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) {
             if (powerupjs.Mouse.containsMouseDown(this.at(j, i).boundingBox)) {
+                if (this.at(j, i).velocity.x !== 0 || this.at(j, i).velocity.y !== 0) {
+                    return;
+                }
                 if (this.selected !== null && this.dragging) {
                     this.prevSelected = this.selected;
                     this.selectTile(this.at(j, i));
+
                     if (this.checkValidSwap(this.prevSelected)) {
                         this.swapTiles(this.prevSelected, this.selected);
                         powerupjs.Mouse.resetDown();
@@ -63,9 +67,14 @@ TileField.prototype.handleTouchInput = function(delta) {
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) {
             if (powerupjs.Touch.containsTouch(this.at(j, i).boundingBox)) {
+                if (this.at(j, i).velocity.x !== 0 || this.at(j, i).velocity.y !== 0) {
+                    return;
+                }
                 if (this.selected !== null && this.dragging) {
+
                     this.prevSelected = this.selected;
                     this.selectTile(this.at(j, i));
+
                     if (this.checkValidSwap(this.prevSelected)) {
                         this.swapTiles(this.prevSelected, this.selected);
                         powerupjs.Touch.reset();
@@ -219,7 +228,7 @@ TileField.prototype.shiftTiles = function() {
                 if (shift > 0) { //swap tile to shift it
                     this.shifting = true;
                     //setTimeout for animation, initiate falling
-                    intervalTimer = (this.cellHeight/this.at(i, j).tileSpeed) * 1000;
+                    intervalTimer = (this.cellHeight / this.at(i, j).tileSpeed) * 1000;
                     this.at(i, j).falling = true;
                     setTimeout(function(tiles, col, row) {
                         tiles.at(col, row).shift -= 1;
@@ -244,15 +253,15 @@ TileField.prototype.shiftTiles = function() {
                 tiles.intersectingMatches.length > 0 ||
                 tiles.longMatches.length > 0 ||
                 tiles.extraLongMatches.length > 0) {
-                    setTimeout(function(tiles){
-                        tiles.loopMatches();
-                        tiles.shiftTiles();
-                    }, 100, tiles);//provides the little delay when matches are made from tiles falling into place
+                setTimeout(function(tiles) {
+                    tiles.loopMatches();
+                    tiles.shiftTiles();
+                }, 100, tiles); //provides the little delay when matches are made from tiles falling into place
             } else {
                 return;
             }
         }
-    }, (intervalTimer + 1), this);//be sure this calls after the last timeout, should this go in the last setTimeOut?
+    }, (intervalTimer + 10), this); //be sure this calls after the last timeout, should this go in the last setTimeOut?
 
 };
 
@@ -409,7 +418,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
         tile1.shiftingDown = true;
         tile2.shiftingUp = true;
     }
-    var timerset = (this.cellWidth/tile1.tileSpeed) * 1000;
+    var timerset = (this.cellWidth / tile1.tileSpeed) * 1000;
     var swap = tile1;
     var swap2 = tile2;
     setTimeout(function(tiles) {
@@ -472,7 +481,7 @@ TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor
             for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) {
                 currVerticalMatch = this.straightVerticalMatches[j];
                 for (let k = 0, m = currHorizontalMatch.length; k < m; k++) {
-                    if(currVerticalTile == 'undefined') {
+                    if (currVerticalTile == 'undefined') {
                         continue;
                     }
                     currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);

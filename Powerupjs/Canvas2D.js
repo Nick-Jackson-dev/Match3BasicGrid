@@ -1,6 +1,6 @@
 "use strict";
 
-var powerupjs = (function (powerupjs) {
+var powerupjs = (function(powerupjs) {
 
     function Canvas2D_Singleton() {
         this._canvas = null;
@@ -9,22 +9,20 @@ var powerupjs = (function (powerupjs) {
         this._canvasOffset = powerupjs.Vector2.zero;
     }
 
-    Object.defineProperty(Canvas2D_Singleton.prototype, "offset",
-        {
-            get: function () {
-                return this._canvasOffset;
-            }
-        });
+    Object.defineProperty(Canvas2D_Singleton.prototype, "offset", {
+        get: function() {
+            return this._canvasOffset;
+        }
+    });
 
-    Object.defineProperty(Canvas2D_Singleton.prototype, "scale",
-        {
-            get: function () {
-                return new powerupjs.Vector2(this._canvas.width / powerupjs.Game.size.x,
-                    this._canvas.height / powerupjs.Game.size.y);
-            }
-        });
+    Object.defineProperty(Canvas2D_Singleton.prototype, "scale", {
+        get: function() {
+            return new powerupjs.Vector2(this._canvas.width / powerupjs.Game.size.x,
+                this._canvas.height / powerupjs.Game.size.y);
+        }
+    });
 
-    Canvas2D_Singleton.prototype.initialize = function (divName, canvasName) {
+    Canvas2D_Singleton.prototype.initialize = function(divName, canvasName) {
         this._canvas = document.getElementById(canvasName);
         this._div = document.getElementById(divName);
 
@@ -41,11 +39,11 @@ var powerupjs = (function (powerupjs) {
         this.resize();
     };
 
-    Canvas2D_Singleton.prototype.clear = function () {
+    Canvas2D_Singleton.prototype.clear = function() {
         this._canvasContext.clearRect(0, 0, this._canvas.width, this._canvas.height);
     };
 
-    Canvas2D_Singleton.prototype.resize = function () {
+    Canvas2D_Singleton.prototype.resize = function() {
         var gameCanvas = powerupjs.Canvas2D._canvas;
         var gameArea = powerupjs.Canvas2D._div;
         var widthToHeight = powerupjs.Game.size.x / powerupjs.Game.size.y;
@@ -79,7 +77,7 @@ var powerupjs = (function (powerupjs) {
         powerupjs.Canvas2D._canvasOffset = offset;
     };
 
-    Canvas2D_Singleton.prototype.drawImage = function (sprite, position, rotation, scale, origin, sourceRect, mirror) {
+    Canvas2D_Singleton.prototype.drawImage = function(sprite, position, rotation, scale, origin, sourceRect, mirror) {
         var canvasScale = this.scale;
 
         position = typeof position !== 'undefined' ? position : powerupjs.Vector2.zero;
@@ -97,20 +95,18 @@ var powerupjs = (function (powerupjs) {
                 sourceRect.width, sourceRect.height,
                 sourceRect.width - origin.x, -origin.y,
                 sourceRect.width, sourceRect.height);
-        }
-        else {
+        } else {
             this._canvasContext.scale(scale * canvasScale.x, scale * canvasScale.y);
             this._canvasContext.translate(position.x, position.y);
             this._canvasContext.rotate(rotation);
             this._canvasContext.drawImage(sprite, sourceRect.x, sourceRect.y,
-                sourceRect.width, sourceRect.height,
-                -origin.x, -origin.y,
+                sourceRect.width, sourceRect.height, -origin.x, -origin.y,
                 sourceRect.width, sourceRect.height);
         }
         this._canvasContext.restore();
     };
 
-    Canvas2D_Singleton.prototype.drawText = function (text, position, origin, color, textAlign, fontname, fontsize) {
+    Canvas2D_Singleton.prototype.drawText = function(text, position, origin, color, textAlign, fontname, fontsize) {
         var canvasScale = this.scale;
 
         position = typeof position !== 'undefined' ? position : powerupjs.Vector2.zero;
@@ -131,7 +127,7 @@ var powerupjs = (function (powerupjs) {
         this._canvasContext.restore();
     };
 
-    Canvas2D_Singleton.prototype.drawPixel = function (x, y, color) {
+    Canvas2D_Singleton.prototype.drawPixel = function(x, y, color) {
         var canvasscale = this.scale;
         this._canvasContext.save();
         this._canvasContext.scale(canvasscale.x, canvasscale.y);
@@ -140,11 +136,23 @@ var powerupjs = (function (powerupjs) {
         this._canvasContext.restore();
     };
 
-    Canvas2D_Singleton.prototype.drawRectangle = function (x, y, width, height) {
+    Canvas2D_Singleton.prototype.drawRectangle = function(x, y, width, height) {
         var canvasScale = this.scale;
         this._canvasContext.save();
         this._canvasContext.scale(canvasScale.x, canvasScale.y);
         this._canvasContext.strokeRect(x, y, width, height);
+        this._canvasContext.restore();
+    };
+
+    Canvas2D_Singleton.prototype.drawFilledRectangle = function(x, y, width, height, color) {
+        var canvasScale = this.scale;
+        var color = typeof color != 'undefined' ? color : powerupjs.Color.black;
+        this._canvasContext.save();
+        this._canvasContext.fillStyle = color.toString();
+        this._canvasContext.scale(canvasScale.x, canvasScale.y);
+        this._canvasContext.lineWidth = 4;
+        this._canvasContext.strokeRect(x, y, width, height);
+        this._canvasContext.fillRect(x, y, width, height);
         this._canvasContext.restore();
     };
 

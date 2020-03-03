@@ -84,6 +84,8 @@ powerupjs.Game.initialize = function() {
     ID.selected_tile = 3;
     ID.select_border = 4;
     ID.tile_field_holder = 5;
+    ID.progress_bar = 6;
+    ID.timer = 7;
     // create the different game states
     //ID.game_state_title = powerupjs.GameStateManager.add(new TitleMenuState());
     //ID.game_state_help = powerupjs.GameStateManager.add(new HelpState());

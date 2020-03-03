@@ -33,7 +33,7 @@ function TestingBasicLevelState() {
 
     this.loadLevels();
 
-    this.goToLevel(this.timeTrialLevels);//initialized just for test
+    this.goToLevel(this.timeTrialLevels); //initialized just for test
 }
 
 TestingBasicLevelState.prototype = Object.create(powerupjs.IGameLoopObject.prototype);
@@ -41,7 +41,7 @@ TestingBasicLevelState.prototype = Object.create(powerupjs.IGameLoopObject.proto
 TestingBasicLevelState.prototype.loadLevels = function() {
     for (var i = 0, l = this.allPlanetLevels.length; i < l; i++) {
         if (this.allPlanetLevels[i]._timeTrialLevel)
-            this.timeTrialLevels.push(new Level(this.allPlanetLevels[i]));
+            this.timeTrialLevels.push(new TimeTrialLevel(this.allPlanetLevels[i]));
     }
     //would do the same with default levels
     //do the same with ither level types

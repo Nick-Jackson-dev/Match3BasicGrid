@@ -57,12 +57,9 @@ Tile.prototype.beStill = function() {
     //this.position = this.parent.getAnchorPosition(this);
 };
 
-Tile.prototype.isSolid = function() {
-    return this.type === TileType.basic || this.type === TileType.special || !this.moveable;
-};
-
 Tile.prototype.deleteTile = function() {
     this.type = TileType.deleted;
+    this.parent.parent.tilesDestroyed += 1;
 };
 
 Tile.prototype.update = function(delta) {

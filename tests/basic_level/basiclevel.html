@@ -45,15 +45,19 @@
             //inherits from Tile./js
             .script('Tiles/BasicTile.js').wait()
             .script('Tiles/SpecialTile.js').wait()
-                //Inherits from SpecialTile.js
-                .script('Tiles/MultiTarget.js').wait()
-                .script('Tiles/VerticalLazer.js').wait()
-                .script('Tiles/HorizontalLazer.js').wait()
-                .script('Tiles/HomingRocket.js').wait()
-                .script('Tiles/VoidBomb.js').wait()
-        .script('TileField.js').wait()
+            //Inherits from SpecialTile.js
+            .script('Tiles/MultiTarget.js').wait()
+            .script('Tiles/VerticalLazer.js').wait()
+            .script('Tiles/HorizontalLazer.js').wait()
+            .script('Tiles/HomingRocket.js').wait()
+            .script('Tiles/VoidBomb.js').wait()
+
+        .script('GameObjects/ProgressBar.js').wait()
+            .script('Gui/CountDownTimer.js').wait()
+            .script('GameObjects/TileField.js').wait()
+
         .script('Levels/Level.js').wait()
-        .script('Levels/TimeTrialLevel.js').wait()
+            .script('Levels/TimeTrialLevel.js').wait()
 
         //states
         .script('Gamestates/TestingBasicLevelState.js').wait()
