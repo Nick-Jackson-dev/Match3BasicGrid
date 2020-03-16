@@ -54,13 +54,20 @@
 
         .script('GameObjects/ProgressBar.js').wait()
             .script('Gui/CountDownTimer.js').wait()
+            .script('Gui/PlayerScore.js').wait()
             .script('GameObjects/TileField.js').wait()
 
         .script('Levels/Level.js').wait()
             .script('Levels/TimeTrialLevel.js').wait()
+            .script('Levels/EnduranceLevel.js').wait()
 
         //states
-        .script('Gamestates/TestingBasicLevelState.js').wait()
+        .script('GameStates/HelpState.js').wait()
+            .script('GameStates/TestingBasicLevelState.js').wait()
+            .script('GameStates/WinState.js').wait()
+            .script('GameStates/LoseState.js').wait()
+            .script('GameStates/SurviveState.js').wait()
+            .script('GameStates/SettingsState.js').wait()
 
         .script('basiclevel.js').wait(function() {
             powerupjs.Game.start('gameArea', 'mycanvas', 1280, 720);

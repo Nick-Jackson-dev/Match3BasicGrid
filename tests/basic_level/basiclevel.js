@@ -49,6 +49,18 @@ powerupjs.Game.loadAssets = function() {
     //mirrored characters
     sprites.merman_right = loadSprite("characters/playable_characters/merman_right.png");
 
+    //temporary sprites, just for tests
+    sprites.temp_win_overlay = loadSprite("temp_sprites/excellent_win_overlay.png");
+    sprites.temp_lose_overlay = loadSprite("temp_sprites/you_lose_overlay.png");
+    sprites.temp_survive_overlay = loadSprite("temp_sprites/you_survived_overlay.png");
+    sprites.temp_pardon_dust_overlay = loadSprite("temp_sprites/pardon_dust_overlay.png");
+    sprites.temp_restart_button = loadSprite("temp_sprites/restart_button.png");
+    sprites.temp_settings_button = loadSprite("temp_sprites/settings_button.png");
+    sprites.temp_help_button = loadSprite("temp_sprites/help_button.png");
+    sprites.temp_exit_button = loadSprite("temp_sprites/exit_button.png");
+    sprites.temp_time_trial_button = loadSprite("temp_sprites/try_timetrial_level_button.png");
+    sprites.temp_target_score_button = loadSprite("temp_sprites/try_target_score_button.png");
+
     //player sounds
 
     //other sounds
@@ -88,11 +100,15 @@ powerupjs.Game.initialize = function() {
     ID.timer = 7;
     // create the different game states
     //ID.game_state_title = powerupjs.GameStateManager.add(new TitleMenuState());
-    //ID.game_state_help = powerupjs.GameStateManager.add(new HelpState());
+    ID.game_state_win = powerupjs.GameStateManager.add(new WinState());
+    ID.game_state_lose = powerupjs.GameStateManager.add(new LoseState());
+    ID.game_state_survive = powerupjs.GameStateManager.add(new SurviveState());
+    ID.game_state_help = powerupjs.GameStateManager.add(new HelpState());
+    ID.game_state_settings = powerupjs.GameStateManager.add(new SettingsState());
     //ID.game_state_playing = powerupjs.GameStateManager.add(new PlayingState());
     ID.game_state_basiclevel_test = powerupjs.GameStateManager.add(new TestingBasicLevelState());
 
     // set the current game mode
-    powerupjs.GameStateManager.switchTo(ID.game_state_basiclevel_test);
+    powerupjs.GameStateManager.switchTo(ID.game_state_settings);
     console.log("initialized");
 };

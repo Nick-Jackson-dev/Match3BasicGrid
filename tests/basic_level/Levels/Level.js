@@ -17,7 +17,20 @@ function Level(levelData, special) {
     this.showMoves = false;
     this.dragging = false;
 
-    this.cornerNav = undefined; //will hold the buttons for settings, exits, and help
+    //navigation in upper right for exit, settings and help
+    this.settingsButton = new powerupjs.Button(sprites.temp_settings_button, ID.layer_objects_1);
+    this.settingsButton.origin = new powerupjs.Vector2(this.settingsButton.width / 2, this.settingsButton.height / 2);
+    this.settingsButton.position = new powerupjs.Vector2(1190, 30);
+    this.add(this.settingsButton);
+    this.helpButton = new powerupjs.Button(sprites.temp_help_button, ID.layer_objects_1);
+    this.helpButton.origin = new powerupjs.Vector2(this.helpButton.width / 2, this.helpButton.height / 2);
+    this.helpButton.position = new powerupjs.Vector2(1250, 30);
+    this.add(this.helpButton);
+    this.exitButton = new powerupjs.Button(sprites.temp_exit_button, ID.layer_objects_1);
+    this.exitButton.origin = new powerupjs.Vector2(this.exitButton.width / 2, this.exitButton.height / 2);
+    this.exitButton.position = new powerupjs.Vector2(1130, 30);
+    this.add(this.exitButton);
+
     this.selectBorder = undefined;
 
     //background would normally load based on player location (upon going to level in the playingstate) based on the player location
@@ -27,14 +40,37 @@ function Level(levelData, special) {
     this.tileFieldHolder.origin = this.tileFieldHolder.center;
     this.tileFieldHolder.position = new powerupjs.Vector2(powerupjs.Game.size.x / 2, powerupjs.Game.size.y / 2);
     this.add(this.tileFieldHolder);
+    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.tiles);
+    this.tiles.position = new powerupjs.Vector2(342, 61);
+    this.tiles.cellWidth = 74;
+    this.tiles.cellHeight = 74;
+    this.add(this.tiles);
 
-    this.loadTiles();
+    this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.select_border);
+    this.selectBorder.position = new powerupjs.Vector2(-2000, -2000);
+    this.selectBorder.parent = this;
+    this.add(this.selectBorder);
+
+    this.reset();
 }
 
 Level.prototype = Object.create(powerupjs.GameObjectList.prototype);
 
 Level.prototype.update = function(delta) {
     powerupjs.GameObjectList.prototype.update.call(this, delta);
+    if (this.exitButton.pressed) {
+        //go to settings/mainmenu
+        powerupjs.GameStateManager.switchTo(ID.game_state_settings);
+        console.log('exitting!');
+    } else if (this.helpButton.pressed) {
+        //goto help
+        powerupjs.GameStateManager.switchTo(ID.game_state_help);
+        console.log('Can I help you?');
+    } else if (this.settingsButton.pressed) {
+        //go to settings/main menu
+        powerupjs.GameStateManager.switchTo(ID.game_state_settings);
+        console.log('setting up are we?');
+    }
 };
 
 Level.prototype.handleInput = function(delta) {
@@ -56,20 +92,14 @@ Level.prototype.handleTouchInput = function(delta) {
     //do something using powerupjs.Touch
 };
 
+Level.prototype.reset = function() {
+    powerupjs.GameObjectList.prototype.reset.call(this);
+    this.loadTiles();
+};
 
 //use tiles in level data to load the tilegrid
 Level.prototype.loadTiles = function() {
-    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.tiles);
-    this.tiles.position = new powerupjs.Vector2(342, 61);
-    this.add(this.tiles);
-    this.selectBorder = new powerupjs.SpriteGameObject(sprites.selected_tile_overlay, ID.layer_overlays, ID.select_border);
-    this.selectBorder.position = new powerupjs.Vector2(-2000, -2000);
-    this.selectBorder.parent = this;
-    this.add(this.selectBorder);
     var done = false;
-
-    this.tiles.cellWidth = 74;
-    this.tiles.cellHeight = 74;
     //loading the tiles in the grid
     while (!done) {
         //generates a board
@@ -96,7 +126,7 @@ Level.prototype.loadTile = function(tileType, x, y) {
         case '?':
             console.log("added basic type");
             return this.loadBasicTile(TileType.basic);
-        case 'b': 
+        case 'b':
             console.log("added VoidBomb");
             return this.loadVoidBomb();
         case 'r':
@@ -122,26 +152,26 @@ Level.prototype.loadBasicTile = function(tileType) {
     return t;
 };
 
-Level.prototype.loadVoidBomb = function () {
+Level.prototype.loadVoidBomb = function() {
     var vb = new VoidBomb();
     return vb;
 };
 
-Level.prototype.loadHomingRocket = function () {
+Level.prototype.loadHomingRocket = function() {
     var hr = new HomingRocket();
     return hr;
 };
 
-Level.prototype.loadMultiTarget = function () {
+Level.prototype.loadMultiTarget = function() {
     var mt = new MultiTarget();
     return mt;
 };
 
-Level.prototype.loadHorizontalLazer = function () {
+Level.prototype.loadHorizontalLazer = function() {
     var hl = new HorizontalLazer();
     return hl;
 };
-Level.prototype.loadVerticalLazer = function () {
+Level.prototype.loadVerticalLazer = function() {
     var vl = new VerticalLazer();
     return vl;
 };

@@ -33,15 +33,18 @@ function TestingBasicLevelState() {
 
     this.loadLevels();
 
-    this.goToLevel(this.timeTrialLevels); //initialized just for test
+    this.goToLevel(this.enduranceLevels); //initialized just for test
 }
 
 TestingBasicLevelState.prototype = Object.create(powerupjs.IGameLoopObject.prototype);
 
 TestingBasicLevelState.prototype.loadLevels = function() {
     for (var i = 0, l = this.allPlanetLevels.length; i < l; i++) {
-        if (this.allPlanetLevels[i]._timeTrialLevel)
+        if (this.allPlanetLevels[i]._timeTrialLevel) {
             this.timeTrialLevels.push(new TimeTrialLevel(this.allPlanetLevels[i]));
+        } else if (this.allPlanetLevels[i]._enduranceLevel) {
+            this.enduranceLevels.push(new EnduranceLevel(this.allPlanetLevels[i]));
+        }
     }
     //would do the same with default levels
     //do the same with ither level types
@@ -93,7 +96,17 @@ TestingBasicLevelState.prototype.selectLevel = function(levelsArray, indexList) 
 TestingBasicLevelState.prototype.goToLevel = function(levelArray) {
     this.currentLevelIndex = this.findAppropriateLevels(levelArray);
     this.currentLevel = levelArray[this.currentLevelIndex];
+    console.log(this.currentLevel);
     this.currentLevel.reset();
+};
+
+//i think just for testing:
+TestingBasicLevelState.prototype.goToLevelIndex = function(index) {
+    if (index === 0) {
+        this.goToLevel(this.timeTrialLevels);
+    } else if (index === 1) {
+        this.goToLevel(this.enduranceLevels);
+    }
 };
 
 TestingBasicLevelState.prototype.handleInput = function(delta) {

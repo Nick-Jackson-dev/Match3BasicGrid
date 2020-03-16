@@ -11,20 +11,12 @@ function ProgressBar() {
     powerupjs.GameObject.call(this, ID.layer_overlays_2, ID.progress_bar);
     this._width = 50;
     this._maxHeight = -575;
-    this._depletionRate = this.getDepletionRate(); //gets depletion rate based on player buffs
-    this._fillRate = this.getFillRate();
     this._x = 1080;
     this._y = 640;
     this.position = new powerupjs.Vector2(this._x, this._y);
-    this._empty = false;
-    this._full = false;
-    this.filling = false;
     this.origin = this._position;
-    this.height = this.getInitialHeight(); //finds what initial height should be - based on player buffs
-    this.fillAmount = 0;
-    this._maxDepletionRate = -18.4;
-    this.gameOver = false;
-    this.winLevel = false;
+    this._maxDepletionRate = -18.3;
+    this.reset();
 }
 
 ProgressBar.prototype = Object.create(powerupjs.GameObject.prototype);
@@ -53,6 +45,17 @@ Object.defineProperty(ProgressBar.prototype, "winLevel", {
     }
 });
 
+ProgressBar.prototype.reset = function() {
+    powerupjs.GameObject.prototype.reset.call(this);
+    this.height = this.getInitialHeight(); //finds what initial height should be - based on player buffs
+    this._depletionRate = this.getDepletionRate(); //gets depletion rate based on player buffs
+    this._fillRate = this.getFillRate();
+    this.fillAmount = 0;
+    this.filling = false;
+    this._empty = false;
+    this._full = false;
+};
+
 ProgressBar.prototype.getInitialHeight = function() {
     //let player = this.root.find(ID.player);
     let defaultHeight = this.maxHeight / 2.12;
@@ -65,17 +68,18 @@ ProgressBar.prototype.getInitialHeight = function() {
 
 ProgressBar.prototype.getDepletionRate = function() {
     //let player = this.root.find(ID.player);
-    let defaultDepletion = -15;
+    let defaultDepletion = -14;
     //let difficultyEffect = undefined;
     //let Playereffect = player.progressBarDepletionEffect; //this is a decimal ie a percentage based on player items
     let playerEffect = 1; //higher effects make it harder
     let difficultyEffect = 1;
+    this._maxDepletionRate *= difficultyEffect;
     return defaultDepletion * playerEffect * difficultyEffect;
 };
 
 ProgressBar.prototype.getFillRate = function() {
     //let player = this.root.find(ID.player);
-    let defaultFill = -20;
+    let defaultFill = -22;
     //let Playereffect = player.progressBarFillEffect; //this is a decimal ie a percentage based on player items
     //let difficultyEffect = undefined;
     let playerEffect = 1; //higher effects make it easier
@@ -83,6 +87,7 @@ ProgressBar.prototype.getFillRate = function() {
     return defaultFill * playerEffect * difficultyEffect;
 };
 
+//called
 ProgressBar.prototype.fillUp = function() {
     this.filling = true;
     this.fillAmount += 1;
@@ -116,7 +121,7 @@ ProgressBar.prototype.update = function(delta) {
     //console.log("depleting");
     this._depletionRate -= 0.002; //get faster the longer player is on level
     if (this._depletionRate < this._maxDepletionRate) {
-        console.log('maxed out'); //maxes out at around 40 seconds (from default timer on normal difficulty)
+        //maxes out at around 40 seconds (from default timer on normal difficulty)
         this._depletionRate = this._maxDepletionRate;
     }
     this.height -= this._depletionRate * delta;

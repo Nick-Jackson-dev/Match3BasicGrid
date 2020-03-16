@@ -21,10 +21,11 @@ function TileField(rows, columns, special, layer, id) {
 TileField.prototype = Object.create(powerupjs.GameObjectGrid.prototype);
 
 TileField.prototype.handleInput = function(delta) {
-    powerupjs.GameObjectList.prototype.handleInput.call(this, delta);
     if (this.shifting) {
         return;
     }
+    powerupjs.GameObjectGrid.prototype.handleInput.call(this, delta);
+
     if (powerupjs.Touch.isTouchDevice) {
         this.handleTouchInput(delta);
     } else {
@@ -81,15 +82,15 @@ TileField.prototype.handleTouchInput = function(delta) {
                     }
                 } else {
                     this.selectTile(this.at(j, i));
-                    console.log(this.selected);
                 }
             }
         }
     }
 };
 
-TileField.prototype.update = function(delta) {
-    powerupjs.GameObjectGrid.prototype.update.call(this, delta);
+TileField.prototype.reset = function() {
+    powerupjs.GameObjectGrid.prototype.reset.call(this);
+    this.deselect();
 };
 
 TileField.prototype.getTileXCoordinate = function(tile) {
@@ -116,7 +117,6 @@ TileField.prototype.resolveMatches = function(initializing) {
             this.shiftTiles();
         } else {
             this.shiftTilesFast();
-
         }
         this.findMatches(initializing);
     }
@@ -262,7 +262,6 @@ TileField.prototype.shiftTiles = function() {
             }
         }
     }, (intervalTimer + 10), this); //be sure this calls after the last timeout, should this go in the last setTimeOut?
-
 };
 
 //handles deleting tiles in matches and inserting special tiles if applicable
