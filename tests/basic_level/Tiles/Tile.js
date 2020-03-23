@@ -14,11 +14,11 @@ var TileType = {
 //inherits from powerupjs.SpriteGameObject
 //want to change inheritance to powerupjs.AnimatedGameObject once animations are made
 
-function Tile(sprite, tileTp, layer, id) {
-    powerupjs.SpriteGameObject.call(this, sprite, layer, id);
+function Tile(tileTp, layer, id) {
+    powerupjs.AnimatedGameObject.call(this, layer, id);
     this.type = tileTp;
-    this._tileSpeed = 300; // pixels/sec
-    this.shift = 0; //Not sure if this is needed
+    this._tileSpeed = 400; // pixels/sec
+    this.shift = 0;
     this.falling = false;
     this.moveable = true; // if not movable it doesn't fall even with nothing under it and can't be switched - not implemented yet
     //these next ones control the appropriate velocities for animation - they are implemetned in the update method but not working correctly
@@ -28,7 +28,7 @@ function Tile(sprite, tileTp, layer, id) {
     this.shiftingDown = false;
 }
 
-Tile.prototype = Object.create(powerupjs.SpriteGameObject.prototype);
+Tile.prototype = Object.create(powerupjs.AnimatedGameObject.prototype);
 
 Object.defineProperty(Tile.prototype, "tileSpeed", {
     get: function() {
@@ -81,11 +81,11 @@ Tile.prototype.update = function(delta) {
         this.velocity = powerupjs.Vector2.zero;
     }
     //some things from V1.2 deleted from this area and this method reorganized
-    powerupjs.SpriteGameObject.prototype.update.call(this, delta);
+    powerupjs.AnimatedGameObject.prototype.update.call(this, delta);
 };
 
 Tile.prototype.draw = function() {
     if (this.type === TileType.background || this.type === TileType.deleted || this.type === TileType.empty)
         return;
-    powerupjs.SpriteGameObject.prototype.draw.call(this);
+    powerupjs.AnimatedGameObject.prototype.draw.call(this);
 };

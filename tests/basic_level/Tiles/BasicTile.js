@@ -6,7 +6,7 @@
 
 
 function BasicTile(tileType) {
-    this.basicTileSprite = undefined;
+    Tile.call(this, tileType, ID.layer_tiles);
     this.basicTileID = undefined;
     //this makes a blank spotr as [planned, but ti does fall like a normal tile - fix later
     if (tileType === TileType.background) {
@@ -15,20 +15,18 @@ function BasicTile(tileType) {
     } else {
         this.basicTileID = Math.floor(Math.random() * 6);
         if (this.basicTileID === 1)
-            this.basicTileSprite = sprites.basic_blue;
+            this.loadAnimation(sprites.basic_blue, "idle", true);
         else if (this.basicTileID === 2)
-            this.basicTileSprite = sprites.basic_green;
+            this.loadAnimation(sprites.basic_green, "idle", true);
         else if (this.basicTileID === 3)
-            this.basicTileSprite = sprites.basic_orange;
+            this.loadAnimation(sprites.basic_orange, "idle", true);
         else if (this.basicTileID === 4)
-            this.basicTileSprite = sprites.basic_red;
+            this.loadAnimation(sprites.basic_red, "idle", true);
         else if (this.basicTileID === 5)
-            this.basicTileSprite = sprites.basic_yellow;
+            this.loadAnimation(sprites.basic_yellow, "idle", true);
         else
-            this.basicTileSprite = sprites.basic_pink;
+            this.loadAnimation(sprites.basic_pink, "idle", true);
     }
-
-
-    Tile.call(this, this.basicTileSprite, tileType, ID.layer_tiles);
+    this.playAnimation("idle");
 }
 BasicTile.prototype = Object.create(Tile.prototype);

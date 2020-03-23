@@ -9,21 +9,8 @@
 //eventually will be able to be combined for special actions.
 
 function SpecialTile(specialID) {
+    Tile.call(this, TileType.special, ID.layer_tiles_1);
     this.specialTileID = specialID;
-    this.specialTileSprite = undefined;
-    if (this.specialTileID === 1) {
-        this.specialTileSprite = sprites.multi_target;
-    } else if (this.specialTileID === 2) {
-        this.specialTileSprite = sprites.lazer_vertical;
-    } else if (this.specialTileID === 3) {
-        this.specialTileSprite = sprites.lazer_horizontal;
-    } else if (this.specialTileID === 4) {
-        this.specialTileSprite = sprites.homing_rocket;
-    } else if (this.specialTileID === 5) {
-        this.specialTileSprite = sprites.void_bomb;
-    }
-
-    Tile.call(this, this.specialTileSprite, TileType.special, ID.layer_tiles_1);
 }
 SpecialTile.prototype = Object.create(Tile.prototype);
 
