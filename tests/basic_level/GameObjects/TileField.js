@@ -435,14 +435,16 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
             tiles.resolveMatches();
             tiles.deselect();
             tiles.findMoves();
-        } else if (!swapBack) {
+        } //handle special tile moves here in if swap1 or swap2 is special activate************************************************************** 
+        else if (!swapBack) {
             tiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
     }, timerset, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
 };
 
 TileField.prototype.selectTile = function(tile) {
-    if (tile.type === TileType.background || tile === this.selected) { // do not select background tiles
+    if (tile.type === TileType.background || tile === this.selected) { // do not select background tiles or the same tile, unless it is special tile already
+        //if same tile and is special, activate it here**********************************************************************************************
         return;
     }
     var selectBorder = this.root.find(ID.select_border);

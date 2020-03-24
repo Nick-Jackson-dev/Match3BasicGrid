@@ -14,4 +14,8 @@ function SpecialTile(specialID) {
 }
 SpecialTile.prototype = Object.create(Tile.prototype);
 
+SpecialTile.prototype.activate = function() {
+    // this is handled differently by each type of special tile
+};
+
 //handle combination actions with functions here eventually
