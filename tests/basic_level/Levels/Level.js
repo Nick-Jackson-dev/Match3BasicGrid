@@ -40,7 +40,7 @@ function Level(levelData, special) {
     this.tileFieldHolder.origin = this.tileFieldHolder.center;
     this.tileFieldHolder.position = new powerupjs.Vector2(powerupjs.Game.size.x / 2, powerupjs.Game.size.y / 2);
     this.add(this.tileFieldHolder);
-    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.tiles);
+    this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.layer_tiles, ID.actual_tiles);
     this.tiles.position = new powerupjs.Vector2(342, 61);
     this.tiles.cellWidth = 74;
     this.tiles.cellHeight = 74;

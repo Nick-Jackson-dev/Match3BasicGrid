@@ -42,7 +42,7 @@ powerupjs.Game.loadAssets = function() {
     sprites.multi_target = loadSprite("tiles/multi_target.png");
     //special tile animations
     sprites.horizontal_zap = loadSprite("tiles/animations/hor_zap@17.png");
-    sprites.void_implosion = loadSprite("tiles/animations/implosion@21");
+    sprites.void_implosion = loadSprite("tiles/animations/implosion@21.png");
     //tricky tile overlays
     //tricky tile animations
     sprites.rust_bust = loadSprite("tiles/animations/rust_break@14.png");
@@ -99,7 +99,7 @@ powerupjs.Game.initialize = function() {
 
     // define object IDs
     ID.player = 1;
-    ID.tiles = 2;
+    ID.actual_tiles = 2;
     ID.selected_tile = 3;
     ID.select_border = 4;
     ID.tile_field_holder = 5;

@@ -7,6 +7,7 @@
 function TileField(rows, columns, special, layer, id) {
     powerupjs.GameObjectGrid.call(this, rows, columns, layer, id);
     this.special = special;
+    this.chaining = false;
     this.straightVerticalMatches = []; //{column, row, length, horizontal}
     this.straightHorizontalMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
@@ -194,6 +195,7 @@ TileField.prototype.shiftTilesFast = function() {
 };
 
 TileField.prototype.shiftTiles = function() {
+    this.chaining = false;
     this.shifting = false;
     var intervalTimer = undefined;
     //put basic tiles in place of deleted first row tiles 
@@ -201,7 +203,7 @@ TileField.prototype.shiftTiles = function() {
     for (let i = 0, r = this.columns; i < r; i++) {
         if (this.at(i, 0).type === TileType.deleted) {
             this.addAt(new BasicTile(TileType.basic), i, 0);
-            this.shifting = true;
+            //this.shifting = true;
         }
     }
     //see what needs a shift based on deleted tiles
@@ -436,7 +438,15 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
             tiles.deselect();
             tiles.findMoves();
         } //handle special tile moves here in if swap1 or swap2 is special activate************************************************************** 
-        else if (!swapBack) {
+        else if (swap.type === TileType.special && swap2.type === TileType.special) {
+            //find and perform combination
+            swap.activate(); //temp
+            swap2.activate(); //temp
+        } else if (swap.type === TileType.special) {
+            swap.activate();
+        } else if (swap2.type === TileType.special) {
+            swap2.activate();
+        } else if (!swapBack) {
             tiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
     }, timerset, (this)); //takes about a quarter sec (ish) for the tiles to take eachothers' places
@@ -680,4 +690,286 @@ TileField.prototype.findVerticalMoves = function(initializing) {
             }
         }
     }
+};
+
+//Do the special tiles activations effects on the board here
+//if the tile types around void bomb are moveable and not background are in the grid they will be sucked in
+//if it is not moveable then it will deal damage to it (ie remove rust, ink, whatever)
+TileField.prototype.activeVoidBomb = function(x, y) {
+    var straightShiftTime = ((this.cellHeight / this.at(x, y).tileSpeed) * 1000) - 60;
+    var diagonalShiftTime = straightShiftTime + 60;
+    let goodAbove = this.checkAboveTile(x, y);
+    let goodRight = this.checkRightTile(x, y);
+    let goodBelow = this.checkBelowTile(x, y);
+    let goodLeft = this.checkLeftTile(x, y);
+    let goodAboveLeft = this.checkAboveLeftTile(x, y);
+    let goodAboveRight = this.checkAboveRightTile(x, y);
+    let goodBelowLeft = this.checkBelowLeftTile(x, y);
+    let goodBelowRight = this.checkBelowRightTile(x, y);
+
+    if (goodRight) {
+        let effected = this.at(x + 1, y);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingLeft = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, straightShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodLeft) {
+        let effected = this.at(x - 1, y);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingRight = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, straightShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodAbove) {
+        let effected = this.at(x, y - 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingDown = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, straightShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodBelow) {
+        let effected = this.at(x, y + 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingUp = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, straightShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodAboveRight) {
+        let effected = this.at(x + 1, y - 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingLeft = true;
+                tile.shiftingDown = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, diagonalShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 140, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodAboveLeft) {
+        let effected = this.at(x - 1, y - 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingRight = true;
+                tile.shiftingDown = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, diagonalShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 140, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodBelowRight) {
+        let effected = this.at(x + 1, y + 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingUp = true;
+                tile.shiftingLeft = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, diagonalShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 140, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodBelowLeft) {
+        let effected = this.at(x - 1, y + 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.shiftingUp = true;
+                tile.shiftingRight = true;
+                setTimeout(function(tile) {
+                    tile.deleteTile();
+                }, diagonalShiftTime, tile); //timer based on tilespeed and size of grid
+            }, 140, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.parent.chaining = true;
+                tile.activate();
+            }, 200, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    setTimeout(function(tiles, x, y) {
+        tiles.at(x, y).deleteTile();
+        if (tiles.chaining) {
+            tiles.chaining = false;
+        } else {
+            tiles.shiftTiles();
+        }
+    }, 525, this, x, y);
+};
+
+TileField.prototype.activeVerticalZap = function(x, y) {
+    //deleting the proper tiles other than the zap tile
+    setTimeout(function(tiles, x, y) {
+        for (let i = tiles.columns - 1, j = 0; i > y || j < y; i--, j++) {
+            if (i > y) {
+                let effected = tiles.at(x, i);
+                if (effected.type === TileType.basic) { //handle special tiles
+                    effected.deleteTile();
+                } else if (effected.type === TileType.special) {
+                    tiles.chaining = true;
+                    effected.activate();
+                } else {
+                    //unmoveable/tricky tiles
+                }
+            }
+            if (j < y) {
+                let effected = tiles.at(x, j);
+                if (effected.type === TileType.basic) { //handle special tiles
+                    effected.deleteTile();
+                } else if (effected.type === TileType.special) {
+                    tiles.chaining = true;
+                    effected.activate();
+                } else {
+                    //unmoveable/tricky tiles
+                }
+            }
+        }
+        //deleting the zap tile and shifting tiles
+        setTimeout(function(tiles, x, y) {
+            tiles.at(x, y).deleteTile();
+            if (tiles.chaining) {
+                tiles.chaining = false;
+                return;
+            } else {
+                tiles.shiftTiles();
+            }
+        }, 40, tiles, x, y);
+    }, 335, this, x, y);
+
+};
+
+TileField.prototype.activeHorZap = function(x, y) {
+    //deleting the proper tiles other than the zap tile
+    setTimeout(function(tiles, x, y) {
+        for (let i = tiles.rows - 1, j = 0; i > x || j < x; i--, j++) {
+            if (i > x) { //also mush handle special tiles and tricky tiles differently
+                let effected = tiles.at(i, y)
+                if (effected.type === TileType.basic) { //handle special tiles
+                    effected.deleteTile();
+                } else if (effected.type === TileType.special) {
+                    tiles.chaining = true;
+                    effected.activate();
+                } else {
+                    //unmoveable/tricky tiles
+                }
+            }
+            if (j < x) { //also mush handle special tiles and tricky tiles differently
+                let effected = tiles.at(j, y)
+                if (effected.type === TileType.basic) { //handle special tiles
+                    effected.deleteTile();
+                } else if (effected.type === TileType.special) {
+                    tiles.chaining = true;
+                    effected.activate();
+                } else {
+                    //unmoveable/tricky tiles
+                }
+            }
+        }
+        //deleting the zap tile and shifting tiles
+        setTimeout(function(tiles, x, y) {
+            tiles.at(x, y).deleteTile();
+            if (tiles.chaining) {
+                tiles.chaining = false
+                return;
+            } else {
+                tiles.shiftTiles();
+            }
+        }, 40, tiles, x, y);
+    }, 300, this, x, y);
+
+
+};
+
+//return bool: if the checked tile is in grid and not empty or background return true
+TileField.prototype.checkAboveTile = function(x, y) {
+    return (y - 1) >= 0 && this.at(x, y - 1).type !== TileType.background && this.at(x, y - 1).type !== TileType.empty;
+};
+TileField.prototype.checkRightTile = function(x, y) {
+    return (x + 1) < this.columns && this.at(x + 1, y).type !== TileType.background && this.at(x + 1, y).type !== TileType.empty && this.at(x + 1, y).yCoordinate === y;
+};
+TileField.prototype.checkBelowTile = function(x, y) {
+    return (y + 1) < this.rows && this.at(x, y + 1).type !== TileType.background && this.at(x, y + 1).type !== TileType.empty;
+};
+TileField.prototype.checkLeftTile = function(x, y) {
+    return (x - 1) >= 0 && this.at(x - 1, y).type !== TileType.background && this.at(x - 1, y).type !== TileType.empty;
+};
+TileField.prototype.checkAboveRightTile = function(x, y) {
+    return (y - 1) >= 0 && (x + 1) <= this.columns && this.at(x + 1, y - 1).type !== TileType.background && this.at(x + 1, y - 1).type !== TileType.empty && this.at(x + 1, y - 1).yCoordinate === (y - 1);
+};
+TileField.prototype.checkAboveLeftTile = function(x, y) {
+    return (y - 1) >= 0 && (x - 1) >= 0 && this.at(x - 1, y - 1).type !== TileType.background && this.at(x - 1, y - 1).type !== TileType.empty;
+};
+TileField.prototype.checkBelowRightTile = function(x, y) {
+    return (y + 1) < this.rows && (x + 1) <= this.columns && this.at(x + 1, y + 1).type !== TileType.background && this.at(x + 1, y + 1).type !== TileType.empty && this.at(x + 1, y + 1).yCoordinate === (y + 1);
+};
+TileField.prototype.checkBelowLeftTile = function(x, y) {
+    return (y + 1) < this.rows && (x - 1) >= 0 && this.at(x - 1, y + 1).type !== TileType.background && this.at(x - 1, y + 1).type !== TileType.empty;
 };

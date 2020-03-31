@@ -58,27 +58,33 @@ Tile.prototype.beStill = function() {
 };
 
 Tile.prototype.deleteTile = function() {
+    var tiles = this.root.find(ID.actual_tiles);
     this.type = TileType.deleted;
     this.parent.parent.tilesDestroyed += 1;
+    tiles.deselect();
 };
 
 Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
     }
-
+    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight) {
+        this.velocity = powerupjs.Vector2.zero;
+    }
     if (this.shiftingLeft) {
         this.velocity.x = -this.tileSpeed;
-    } else if (this.shiftingRight) {
+    }
+    if (this.shiftingRight) {
         this.velocity.x = this.tileSpeed;
-    } else if (this.shiftingUp) {
+    }
+    if (this.shiftingUp) {
         this.velocity.y = -this.tileSpeed;
-    } else if (this.shiftingDown) {
+    }
+    if (this.shiftingDown) {
         this.velocity.y = this.tileSpeed;
-    } else if (this.falling) {
+    }
+    if (this.falling) {
         this.velocity.y = this.tileSpeed;
-    } else {
-        this.velocity = powerupjs.Vector2.zero;
     }
     //some things from V1.2 deleted from this area and this method reorganized
     powerupjs.AnimatedGameObject.prototype.update.call(this, delta);

@@ -7,7 +7,7 @@
 //holds a timer - if the timer runs out the player loses
 
 function EnduranceLevel(levelData) {
-    Level.call(this, levelData, false);
+    Level.call(this, levelData);
 
     this.targetScore = levelData.targetScore; //this is the number
     var targetScore = new powerupjs.Label("Arial", "26pt", ID.layer_overlays_2); //this is the object that shows the target score
