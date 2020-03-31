@@ -854,7 +854,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
     setTimeout(function(tiles, x, y) {
         tiles.at(x, y).deleteTile();
         tiles.chainsLeft -= 1;
-        console.log(tiles.chainsLeft);
         if (tiles.chainsLeft == 0) {
             tiles.shiftTiles();
         }
@@ -891,7 +890,6 @@ TileField.prototype.activeVerticalZap = function(x, y) {
         setTimeout(function(tiles, x, y) {
             tiles.at(x, y).deleteTile();
             tiles.chainsLeft -= 1;
-            console.log(tiles.chainsLeft);
             if (tiles.chainsLeft == 0) {
                 tiles.shiftTiles();
             }
@@ -930,7 +928,6 @@ TileField.prototype.activeHorZap = function(x, y) {
         setTimeout(function(tiles, x, y) {
             tiles.at(x, y).deleteTile();
             tiles.chainsLeft -= 1;
-            console.log(tiles.chainsLeft);
             if (tiles.chainsLeft == 0) {
                 tiles.shiftTiles();
             }
