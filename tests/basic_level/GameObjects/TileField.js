@@ -7,7 +7,7 @@
 function TileField(rows, columns, special, layer, id) {
     powerupjs.GameObjectGrid.call(this, rows, columns, layer, id);
     this.special = special;
-    this.chaining = false;
+    this.chainsLeft = 0; //counts up when special tile gets activated and down when the special tile deletes so that shiftTiles method is not called more than once
     this.straightVerticalMatches = []; //{column, row, length, horizontal}
     this.straightHorizontalMatches = []; //{column, row, length, horizontal}
     this.squareMatches = []; //{column, row}
@@ -53,7 +53,7 @@ TileField.prototype.handleComputerInput = function(delta) {
                         this.swapTiles(this.prevSelected, this.selected);
                         powerupjs.Mouse.resetDown();
                     }
-                } else {
+                } else { //if there is no current selection
                     this.selectTile(this.at(j, i));
                 }
             }
@@ -454,7 +454,10 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
 
 TileField.prototype.selectTile = function(tile) {
     if (tile.type === TileType.background || tile === this.selected) { // do not select background tiles or the same tile, unless it is special tile already
-        //if same tile and is special, activate it here**********************************************************************************************
+        if (tile.type === TileType.special && tile === this.selected && (powerupjs.Mouse.containsMousePress(tile.boundingBox) || powerupjs.Touch.containsTouchPress(tile.boundingBox))) {
+            //the contain toucha nd mouse press are to prevent activation on click/touch and hold
+            tile.activate();
+        }
         return;
     }
     var selectBorder = this.root.find(ID.select_border);
@@ -706,6 +709,7 @@ TileField.prototype.activeVoidBomb = function(x, y) {
     let goodAboveRight = this.checkAboveRightTile(x, y);
     let goodBelowLeft = this.checkBelowLeftTile(x, y);
     let goodBelowRight = this.checkBelowRightTile(x, y);
+    this.chainsLeft += 1;
 
     if (goodRight) {
         let effected = this.at(x + 1, y);
@@ -718,7 +722,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 200, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -736,7 +739,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 200, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -754,7 +756,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 200, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -772,7 +773,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 200, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -791,7 +791,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 140, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -810,7 +809,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 140, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -829,7 +827,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 140, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -848,7 +845,6 @@ TileField.prototype.activeVoidBomb = function(x, y) {
             }, 140, effected); //timer based on animation speed of void bomb
         } else if (effected.type === TileType.special) {
             setTimeout(function(tile) {
-                tile.parent.chaining = true;
                 tile.activate();
             }, 200, effected); //timer based on animation speed of void bomb
         } else {
@@ -857,15 +853,16 @@ TileField.prototype.activeVoidBomb = function(x, y) {
     }
     setTimeout(function(tiles, x, y) {
         tiles.at(x, y).deleteTile();
-        if (tiles.chaining) {
-            tiles.chaining = false;
-        } else {
+        tiles.chainsLeft -= 1;
+        console.log(tiles.chainsLeft);
+        if (tiles.chainsLeft == 0) {
             tiles.shiftTiles();
         }
     }, 525, this, x, y);
 };
 
 TileField.prototype.activeVerticalZap = function(x, y) {
+    this.chainsLeft += 1;
     //deleting the proper tiles other than the zap tile
     setTimeout(function(tiles, x, y) {
         for (let i = tiles.columns - 1, j = 0; i > y || j < y; i--, j++) {
@@ -874,7 +871,6 @@ TileField.prototype.activeVerticalZap = function(x, y) {
                 if (effected.type === TileType.basic) { //handle special tiles
                     effected.deleteTile();
                 } else if (effected.type === TileType.special) {
-                    tiles.chaining = true;
                     effected.activate();
                 } else {
                     //unmoveable/tricky tiles
@@ -885,7 +881,6 @@ TileField.prototype.activeVerticalZap = function(x, y) {
                 if (effected.type === TileType.basic) { //handle special tiles
                     effected.deleteTile();
                 } else if (effected.type === TileType.special) {
-                    tiles.chaining = true;
                     effected.activate();
                 } else {
                     //unmoveable/tricky tiles
@@ -895,10 +890,9 @@ TileField.prototype.activeVerticalZap = function(x, y) {
         //deleting the zap tile and shifting tiles
         setTimeout(function(tiles, x, y) {
             tiles.at(x, y).deleteTile();
-            if (tiles.chaining) {
-                tiles.chaining = false;
-                return;
-            } else {
+            tiles.chainsLeft -= 1;
+            console.log(tiles.chainsLeft);
+            if (tiles.chainsLeft == 0) {
                 tiles.shiftTiles();
             }
         }, 40, tiles, x, y);
@@ -907,6 +901,7 @@ TileField.prototype.activeVerticalZap = function(x, y) {
 };
 
 TileField.prototype.activeHorZap = function(x, y) {
+    this.chainsLeft += 1;
     //deleting the proper tiles other than the zap tile
     setTimeout(function(tiles, x, y) {
         for (let i = tiles.rows - 1, j = 0; i > x || j < x; i--, j++) {
@@ -915,7 +910,6 @@ TileField.prototype.activeHorZap = function(x, y) {
                 if (effected.type === TileType.basic) { //handle special tiles
                     effected.deleteTile();
                 } else if (effected.type === TileType.special) {
-                    tiles.chaining = true;
                     effected.activate();
                 } else {
                     //unmoveable/tricky tiles
@@ -926,7 +920,6 @@ TileField.prototype.activeHorZap = function(x, y) {
                 if (effected.type === TileType.basic) { //handle special tiles
                     effected.deleteTile();
                 } else if (effected.type === TileType.special) {
-                    tiles.chaining = true;
                     effected.activate();
                 } else {
                     //unmoveable/tricky tiles
@@ -936,10 +929,9 @@ TileField.prototype.activeHorZap = function(x, y) {
         //deleting the zap tile and shifting tiles
         setTimeout(function(tiles, x, y) {
             tiles.at(x, y).deleteTile();
-            if (tiles.chaining) {
-                tiles.chaining = false
-                return;
-            } else {
+            tiles.chainsLeft -= 1;
+            console.log(tiles.chainsLeft);
+            if (tiles.chainsLeft == 0) {
                 tiles.shiftTiles();
             }
         }, 40, tiles, x, y);
