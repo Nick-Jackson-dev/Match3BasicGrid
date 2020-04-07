@@ -26,9 +26,15 @@ function Tile(tileTp, layer, id) {
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
+    this.initiate();
 }
 
 Tile.prototype = Object.create(powerupjs.AnimatedGameObject.prototype);
+
+Tile.prototype.initiate = function() {
+    this.origin.x = 36;
+    this.origin.y = 36;
+}
 
 Object.defineProperty(Tile.prototype, "tileSpeed", {
     get: function() {
@@ -54,6 +60,7 @@ Tile.prototype.beStill = function() {
     this.shiftingLeft = false;
     this.shiftingUp = false;
     this.shiftingDown = false;
+    this.velocity = powerupjs.Vector2.zero;
     //this.position = this.parent.getAnchorPosition(this);
 };
 
@@ -68,7 +75,7 @@ Tile.prototype.update = function(delta) {
     if (!this.moveable) { // no updating position if not movable
         return;
     }
-    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight) {
+    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight && !this.turning && !this.thrusting) {
         this.velocity = powerupjs.Vector2.zero;
     }
     if (this.shiftingLeft) {

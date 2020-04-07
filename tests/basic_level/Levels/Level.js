@@ -41,7 +41,7 @@ function Level(levelData, special) {
     this.tileFieldHolder.position = new powerupjs.Vector2(powerupjs.Game.size.x / 2, powerupjs.Game.size.y / 2);
     this.add(this.tileFieldHolder);
     this.tiles = new TileField(this.levelData.tiles.length, this.levelData.tiles[0].length, this.special, ID.layer_tiles, ID.actual_tiles);
-    this.tiles.position = new powerupjs.Vector2(342, 61);
+    this.tiles.position = new powerupjs.Vector2(375, 94);
     this.tiles.cellWidth = 74;
     this.tiles.cellHeight = 74;
     this.add(this.tiles);
@@ -124,22 +124,16 @@ Level.prototype.loadTiles = function() {
 Level.prototype.loadTile = function(tileType, x, y) {
     switch (tileType) {
         case '?':
-            console.log("added basic type");
             return this.loadBasicTile(TileType.basic);
         case 'b':
-            console.log("added VoidBomb");
             return this.loadVoidBomb();
         case 'r':
-            console.log("added HomingRocket");
             return this.loadHomingRocket();
         case 'm':
-            console.log("added MultiTarget");
             return this.loadMultiTarget();
         case 'h':
-            console.log("added HorizontalLazer");
             return this.loadHorizontalLazer();
         case 'v':
-            console.log("added VerticalLazer");
             return this.loadVerticalLazer();
         default:
             return this.loadBasicTile(TileType.background);

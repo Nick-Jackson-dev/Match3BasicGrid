@@ -18,4 +18,8 @@ SpecialTile.prototype.activate = function() {
     // this is handled differently by each type of special tile
 };
 
+SpecialTile.prototype.update = function(delta) {
+    Tile.prototype.update.call(this, delta);
+};
+
 //handle combination actions with functions here eventually

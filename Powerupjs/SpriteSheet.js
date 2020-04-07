@@ -1,6 +1,6 @@
 "use strict";
 
-var powerupjs = (function (powerupjs) {
+var powerupjs = (function(powerupjs) {
 
     function SpriteSheet(imageName, createCollisionMask) {
         console.log("Loading sprite: " + imageName);
@@ -14,7 +14,7 @@ var powerupjs = (function (powerupjs) {
         this._collisionMask = null;
 
         var sprite = this;
-        this._image.onload = function () {
+        this._image.onload = function() {
             if (createCollisionMask) {
                 console.log("Creating collision mask for sprite: " + imageName);
                 sprite.createPixelCollisionMask();
@@ -34,49 +34,43 @@ var powerupjs = (function (powerupjs) {
             this._sheetRows = colRow[1];
     }
 
-    Object.defineProperty(SpriteSheet.prototype, "image",
-        {
-            get: function () {
-                return this._image;
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "image", {
+        get: function() {
+            return this._image;
+        }
+    });
 
-    Object.defineProperty(SpriteSheet.prototype, "width",
-        {
-            get: function () {
-                return this._image.width / this._sheetColumns;
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "width", {
+        get: function() {
+            return this._image.width / this._sheetColumns;
+        }
+    });
 
-    Object.defineProperty(SpriteSheet.prototype, "height",
-        {
-            get: function () {
-                return this._image.height / this._sheetRows;
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "height", {
+        get: function() {
+            return this._image.height / this._sheetRows;
+        }
+    });
 
-    Object.defineProperty(SpriteSheet.prototype, "size",
-        {
-            get: function () {
-                return new powerupjs.Vector2(this.width, this.height);
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "size", {
+        get: function() {
+            return new powerupjs.Vector2(this.width, this.height);
+        }
+    });
 
-    Object.defineProperty(SpriteSheet.prototype, "center",
-        {
-            get: function () {
-                return this.size.divideBy(2);
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "center", {
+        get: function() {
+            return this.size.divideBy(2);
+        }
+    });
 
-    Object.defineProperty(SpriteSheet.prototype, "nrSheetElements",
-        {
-            get: function () {
-                return this._sheetRows * this._sheetColumns;
-            }
-        });
+    Object.defineProperty(SpriteSheet.prototype, "nrSheetElements", {
+        get: function() {
+            return this._sheetRows * this._sheetColumns;
+        }
+    });
 
-    SpriteSheet.prototype.createPixelCollisionMask = function () {
+    SpriteSheet.prototype.createPixelCollisionMask = function() {
         this._collisionMask = [];
         var w = this._image.width;
         var h = this._image.height;
@@ -94,7 +88,7 @@ var powerupjs = (function (powerupjs) {
         }
     };
 
-    SpriteSheet.prototype.getAlpha = function (x, y, sheetIndex, mirror) {
+    SpriteSheet.prototype.getAlpha = function(x, y, sheetIndex, mirror) {
         if (this._collisionMask === null)
             return 255;
 
@@ -111,12 +105,13 @@ var powerupjs = (function (powerupjs) {
             return this._collisionMask[arrayIndex];
     };
 
-    SpriteSheet.prototype.draw = function (position, origin, sheetIndex, mirror) {
+    SpriteSheet.prototype.draw = function(position, origin, sheetIndex, mirror, rotation) {
+        rotation = typeof rotation !== 'undefined' ? rotation : 0;
         var columnIndex = sheetIndex % this._sheetColumns;
         var rowIndex = Math.floor(sheetIndex / this._sheetColumns) % this._sheetRows;
         var imagePart = new powerupjs.Rectangle(columnIndex * this.width, rowIndex * this.height,
             this.width, this.height);
-        powerupjs.Canvas2D.drawImage(this._image, position, 0, 1, origin, imagePart, mirror);
+        powerupjs.Canvas2D.drawImage(this._image, position, rotation, 1, origin, imagePart, mirror);
     };
 
     powerupjs.SpriteSheet = SpriteSheet;

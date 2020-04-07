@@ -443,9 +443,17 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
             swap.activate(); //temp
             swap2.activate(); //temp
         } else if (swap.type === TileType.special) {
-            swap.activate();
+            if (swap.specialTileID === 1) {
+                swap.activate(swap2.basicTileID);
+            } else {
+                swap.activate();
+            }
         } else if (swap2.type === TileType.special) {
-            swap2.activate();
+            if (swap2.specialTileID === 1) {
+                swap2.activate(swap.basicTileID);
+            } else {
+                swap2.activate();
+            }
         } else if (!swapBack) {
             tiles.swapTiles(swap, swap2, true); //this has timer, however nothing has to wait on this timer to run its course as it is just switching back if no valid match
         }
@@ -695,7 +703,93 @@ TileField.prototype.findVerticalMoves = function(initializing) {
     }
 };
 
+//upon launch it will destroy those up, down, left and right of rocket (if they exist) 
+//need 125 millisecond delay
+TileField.prototype.launchHomingRocket = function(x, y) {
+    this.chainsLeft += 1;
+    let goodAbove = this.checkAboveTile(x, y);
+    let goodRight = this.checkRightTile(x, y);
+    let goodBelow = this.checkBelowTile(x, y);
+    let goodLeft = this.checkLeftTile(x, y);
+    if (goodRight) {
+        let effected = this.at(x + 1, y);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.deleteTile(); //timer based on tilespeed and size of grid
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.activate();
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodAbove) {
+        let effected = this.at(x, y - 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.deleteTile(); //timer based on tilespeed and size of grid
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.activate();
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodLeft) {
+        let effected = this.at(x - 1, y);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.deleteTile(); //timer based on tilespeed and size of grid
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.activate();
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+    if (goodBelow) {
+        let effected = this.at(x, y + 1);
+        if (effected.type === TileType.basic) {
+            setTimeout(function(tile) {
+                tile.deleteTile(); //timer based on tilespeed and size of grid
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else if (effected.type === TileType.special) {
+            setTimeout(function(tile) {
+                tile.activate();
+            }, 125, effected); //timer based on animation speed of void bomb
+        } else {
+            //damage the tile or activate specialtile
+        }
+    }
+};
+
 //Do the special tiles activations effects on the board here
+//homing rocket will get passed a tile for it to travel to and that tile will be deleted (or damaged or activated depending on type)
+TileField.prototype.activeHomingRocket = function(x, y, timer) {
+    setTimeout(function(tiles, x, y) {
+        tiles.at(x, y).explode();
+        tiles.chainsLeft -= 1;
+        let target = tiles.at(x, y).target;
+        if (target.type === TileType.basic) {
+            tiles.at(x, y).target.deleteTile();
+        } else if (target.type === TileType.special) {
+            tiles.at(x, y).target.activate();
+        } //else damageable *********************
+        tiles.at(x, y).deleteTile();
+        setTimeout(function(tiles) {
+            if (tiles.chainsLeft === 0) {
+                tiles.shiftTiles();
+            }
+        }, 600, tiles);
+    }, timer + 50, this, x, y);
+};
+
 //if the tile types around void bomb are moveable and not background are in the grid they will be sucked in
 //if it is not moveable then it will deal damage to it (ie remove rust, ink, whatever)
 TileField.prototype.activeVoidBomb = function(x, y) {
@@ -857,7 +951,7 @@ TileField.prototype.activeVoidBomb = function(x, y) {
         if (tiles.chainsLeft == 0) {
             tiles.shiftTiles();
         }
-    }, 525, this, x, y);
+    }, 425, this, x, y);
 };
 
 TileField.prototype.activeVerticalZap = function(x, y) {
@@ -933,8 +1027,6 @@ TileField.prototype.activeHorZap = function(x, y) {
             }
         }, 40, tiles, x, y);
     }, 300, this, x, y);
-
-
 };
 
 //return bool: if the checked tile is in grid and not empty or background return true
@@ -961,4 +1053,36 @@ TileField.prototype.checkBelowRightTile = function(x, y) {
 };
 TileField.prototype.checkBelowLeftTile = function(x, y) {
     return (y + 1) < this.rows && (x - 1) >= 0 && this.at(x - 1, y + 1).type !== TileType.background && this.at(x - 1, y + 1).type !== TileType.empty;
+};
+
+//returns a tile that fits target criteria of an objective tile, if not that then a tricky tile, if not that a random tile of any kind 
+//and the targetted animation overlay **NEEDS IMPLEMENTED**
+TileField.prototype.getRocketTarget = function() {
+    console.log("assigning target");
+    var potentialTargets = [];
+    var objectiveData = this.parent.objectiveData; //undefined for now so no searching
+    if (!objectiveData) {
+        console.log('potentialTargets list expanded');
+        for (let i = this.rows - 1; i >= 0; i--) {
+            for (let j = this.columns - 1; j >= 0; j--) {
+                potentialTargets.push(this.at(i, j));
+            }
+        }
+    }
+    var randomTargetIndex = Math.floor(Math.random() * potentialTargets.length);
+    return potentialTargets[randomTargetIndex];
+};
+
+//will always be passed basicType from MultiTarget activate method
+TileField.prototype.getMultiTargets = function(basicType) {
+    console.log("getting targets");
+    var targets = [];
+    for (let i = this.rows - 1; i >= 0; i--) {
+        for (let j = this.columns - 1; j >= 0; j--) {
+            if (this.at(i, j).type === TileType.basic && this.at(i, j).basicTileID === basicType) {
+                targets.push(this.at(i, j));
+            }
+        }
+    }
+    return targets;
 };
