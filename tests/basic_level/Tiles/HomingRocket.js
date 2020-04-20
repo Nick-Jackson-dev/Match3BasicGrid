@@ -1,7 +1,7 @@
 //JS File
 "use strict";
 
-//HomingRocket
+//HomingRocket - NOT GOING TO BE USED
 
 function HomingRocket() {
     SpecialTile.call(this, 4);

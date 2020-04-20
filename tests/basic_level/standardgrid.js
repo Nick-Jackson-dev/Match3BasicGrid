@@ -5,7 +5,13 @@
 'h' = HorizontalLazer
 'v' = VertaicalLazer
 'm' = MultiTarget
-'r' = HomingRocket
+'r' = HomingRocket - NOT TO BE USED
+'0' = pink basic
+'1' = blue basic
+'2' = green basic
+'3' = orange basic
+'4' = red basic
+'5' = yellow basic
 */
 
 var standardlevels = [];
@@ -37,7 +43,7 @@ standardlevels.push({
     _timeTrialLevel: false,
     _enduranceLevel: true,
     _objectiveLevel: false,
-    targetScore: 3500,
+    targetScore: 3000,
     _combatLevel: false,
     _planet: 'charybdo',
     _prevLocation: 'test0',
@@ -45,9 +51,9 @@ standardlevels.push({
     _difficulty: undefined,
     tiles: ["????????",
         "????????",
-        "????m???",
         "????????",
-        "?r??????",
+        "????????",
+        "????????",
         "????????",
         "????????",
         "????????"

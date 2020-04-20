@@ -17,21 +17,21 @@ var TileType = {
 function Tile(tileTp, layer, id) {
     powerupjs.AnimatedGameObject.call(this, layer, id);
     this.type = tileTp;
-    this._tileSpeed = 400; // pixels/sec
-    this.shift = 0;
-    this.falling = false;
     this.moveable = true; // if not movable it doesn't fall even with nothing under it and can't be switched - not implemented yet
-    //these next ones control the appropriate velocities for animation - they are implemetned in the update method but not working correctly
-    this.shiftingRight = false;
-    this.shiftingLeft = false;
-    this.shiftingUp = false;
-    this.shiftingDown = false;
     this.initiate();
 }
 
 Tile.prototype = Object.create(powerupjs.AnimatedGameObject.prototype);
 
 Tile.prototype.initiate = function() {
+    this._tileSpeed = 400; // pixels/sec
+    this.shift = 0;
+    this.falling = false;
+    //these next ones control the appropriate velocities for animation - they are implemetned in the update method but not working correctly
+    this.shiftingRight = false;
+    this.shiftingLeft = false;
+    this.shiftingUp = false;
+    this.shiftingDown = false;
     this.origin.x = 36;
     this.origin.y = 36;
 }

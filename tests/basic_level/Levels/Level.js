@@ -125,10 +125,22 @@ Level.prototype.loadTile = function(tileType, x, y) {
     switch (tileType) {
         case '?':
             return this.loadBasicTile(TileType.basic);
+        case '0':
+            return this.loadBasicPink(TileType.basic);
+        case '1':
+            return this.loadBasicBlue(TileType.basic);
+        case '2':
+            return this.loadBasicGreen(TileType.basic);
+        case '3':
+            return this.loadBasicOrange(TileType.basic);
+        case '4':
+            return this.loadBasicRed(TileType.basic);
+        case '5':
+            return this.loadBasicYellow(TileType.basic);
         case 'b':
             return this.loadVoidBomb();
-        case 'r':
-            return this.loadHomingRocket();
+            //case 'r':
+            //return this.loadHomingRocket(); //homing rockets not being used
         case 'm':
             return this.loadMultiTarget();
         case 'h':
@@ -145,22 +157,14 @@ Level.prototype.loadBasicTile = function(tileType) {
     var t = new BasicTile(tileType);
     return t;
 };
-
 Level.prototype.loadVoidBomb = function() {
     var vb = new VoidBomb();
     return vb;
 };
-
-Level.prototype.loadHomingRocket = function() {
-    var hr = new HomingRocket();
-    return hr;
-};
-
 Level.prototype.loadMultiTarget = function() {
     var mt = new MultiTarget();
     return mt;
 };
-
 Level.prototype.loadHorizontalLazer = function() {
     var hl = new HorizontalLazer();
     return hl;
@@ -169,3 +173,36 @@ Level.prototype.loadVerticalLazer = function() {
     var vl = new VerticalLazer();
     return vl;
 };
+
+//loading the different basic types in specific spots
+Level.prototype.loadBasicPink = function(tileType) {
+    var t = new BasicTile(tileType, 0);
+    return t;
+};
+Level.prototype.loadBasicBlue = function(tileType) {
+    var t = new BasicTile(tileType, 1);
+    return t;
+};
+Level.prototype.loadBasicGreen = function(tileType) {
+    var t = new BasicTile(tileType, 2);
+    return t;
+};
+Level.prototype.loadBasicOrange = function(tileType) {
+    var t = new BasicTile(tileType, 3);
+    return t;
+};
+Level.prototype.loadBasicRed = function(tileType) {
+    var t = new BasicTile(tileType, 4);
+    return t;
+};
+Level.prototype.loadBasicYellow = function(tileType) {
+    var t = new BasicTile(tileType, 5);
+    return t;
+};
+
+
+/*homing rockets not being used
+Level.prototype.loadHomingRocket = function() {
+    var hr = new HomingRocket();
+    return hr;
+};*/

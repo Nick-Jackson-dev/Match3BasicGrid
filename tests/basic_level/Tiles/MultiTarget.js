@@ -22,8 +22,20 @@ MultiTarget.prototype.activate = function(basicType) {
     console.log(this.targets);
     setTimeout(function(tile) {
         for (let i = 0, l = tile.targets.length - 1; i <= l; i++) {
-            tile.targets[i].deleteTile();
+            //add a retical overlay on each target
+            let timer = Math.random() * 1000;
+            setTimeout(function(tile, index, final) {
+                tile.targets[index].deleteTile(); // need to have retical firing animation
+                if (index === final) {
+                    setTimeout(function(tile) {
+                        tile.deleteTile();
+                        tile.parent.chainsLeft -= 1;
+                        if (tile.parent.chainsLeft === 0) {
+                            tile.parent.shiftTiles();
+                        }
+                    }, 1001, tile);
+                }
+            }, timer, tile, i, l);
         }
-        tile.deleteTile();
-    }, 500, this);
+    }, 200, this);
 };

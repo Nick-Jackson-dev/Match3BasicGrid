@@ -37,7 +37,7 @@ powerupjs.Game.loadAssets = function() {
     //special tiles
     sprites.lazer_horizontal = loadSprite("tiles/lazer_horizontal.png");
     sprites.lazer_vertical = loadSprite("tiles/lazer_vertical.png");
-    sprites.homing_rocket = loadSprite("tiles/homing_rocket.png");
+    //sprites.homing_rocket = loadSprite("tiles/homing_rocket.png"); //homing rocket is gone for now
     sprites.void_bomb = loadSprite("tiles/void_bomb.png");
     sprites.multi_target = loadSprite("tiles/multi_target.png");
     //special tile animations
