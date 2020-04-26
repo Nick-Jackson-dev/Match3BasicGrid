@@ -508,13 +508,16 @@ TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor
         for (let i = 0, l = this.straightHorizontalMatches.length; i < l; i++) { //look through all horizontal matches
             currHorizontalMatch = this.straightHorizontalMatches[i];
             for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) { //look through all vertical matches
+                if (currHorizontalMatch == 'undefined') {
+                    continue;
+                }
                 currVerticalMatch = this.straightVerticalMatches[j];
-                for (let k = 0, m = currHorizontalMatch.length; k < m; k++) { //look at each tile in the current horizontal match
-                    if (currVerticalTile == 'undefined') {
+                for (let k = 0, m = currHorizontalMatch.length || 3; k < m; k++) { //look at each tile in the current horizontal match
+                    if (currVerticalTile == 'undefined' || currVerticalMatch == 'undefined') {
                         continue;
                     }
                     currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                    for (let t = 0, v = currVerticalMatch.length; t < v; t++) { //look at each tile in the current vertical match
+                    for (let t = 0, v = currVerticalMatch.length || 3; t < v; t++) { //look at each tile in the current vertical match
                         currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                         if (currHorizontalTile === currVerticalTile) { //compare each tile, if they are the same then it is an intersection
                             this.intersectingMatches.push({ //add intersection to the intersecting matches array
@@ -539,12 +542,12 @@ TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor
                 currHorizontalMatch = this.longMatches[i];
                 for (let j = 0, z = this.straightVerticalMatches.length; j < z; j++) { //looking at vertical matches
                     currVerticalMatch = this.straightVerticalMatches[j];
-                    for (let k = 0, m = currHorizontalMatch.length; k < m; k++) { //look thorugh each tile of the horizontal match
-                        if (currVerticalTile == 'undefined') {
+                    for (let k = 0, m = currHorizontalMatch.length || 4; k < m; k++) { //look thorugh each tile of the horizontal match
+                        if (currVerticalTile == 'undefined' || currVerticalMatch == 'undefined') {
                             continue;
                         }
                         currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                        for (let t = 0, v = currVerticalMatch.length; t < v; t++) { //look at each tile in vertical match
+                        for (let t = 0, v = currVerticalMatch.length || 4; t < v; t++) { //look at each tile in vertical match
                             currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                             if (currHorizontalTile === currVerticalTile) { // compare the tiles that are being looked at
                                 this.intersectingMatches.push({ //add intersection to the intersecting matches array
@@ -566,12 +569,12 @@ TileField.prototype.findVoidBombs = function() { //{columnHor, rowHor, lengthHor
                 currVerticalMatch = this.longMatches[i];
                 for (let j = 0, z = this.straightHorizontalMatches.length; j < z; j++) { //looking at vertical matches
                     currHorizontalMatch = this.straightHorizontalMatches[j];
-                    for (let k = 0, m = currHorizontalMatch.length; k < m; k++) { //look thorugh each tile of the horizontal match
+                    for (let k = 0, m = currHorizontalMatch.length || 4; k < m; k++) { //look thorugh each tile of the horizontal match
                         if (currVerticalTile == 'undefined') {
                             continue;
                         }
                         currHorizontalTile = this.at(currHorizontalMatch.column + k, currHorizontalMatch.row);
-                        for (let t = 0, v = currVerticalMatch.length; t < v; t++) { //look at each tile in vertical match
+                        for (let t = 0, v = currVerticalMatch.length || 4; t < v; t++) { //look at each tile in vertical match
                             currVerticalTile = this.at(currVerticalMatch.column, currVerticalMatch.row + t);
                             if (currHorizontalTile === currVerticalTile) { // compare the tiles that are being looked at
                                 this.intersectingMatches.push({ //add intersection to the intersecting matches array
@@ -691,8 +694,6 @@ TileField.prototype.findVerticalMatches = function(initializing) {
                         }
                         if (matchlength === 4) {
                             this.longMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false, insertionPoint: insertionPoint });
-                            let last = this.longMatches.length - 1;
-                            console.log(this.longMatches[last]);
                         } else if (matchlength >= 5) {
                             this.extraLongMatches.push({ column: i, row: j + 1 - matchlength, length: matchlength, horizontal: false, insertionPoint: insertionPoint });
                         } else {
