@@ -64,10 +64,12 @@ Tile.prototype.beStill = function() {
     //this.position = this.parent.getAnchorPosition(this);
 };
 
-Tile.prototype.deleteTile = function() {
+Tile.prototype.deleteTile = function(nullifyScore) {
+    nullifyScore = typeof nullifyScore != 'undefined' ? nullifyScore : false;
     var tiles = this.root.find(ID.actual_tiles);
     this.type = TileType.deleted;
-    this.parent.parent.tilesDestroyed += 1;
+    if (!nullifyScore)
+        this.parent.parent.tilesDestroyed += 1;
     tiles.deselect();
 };
 

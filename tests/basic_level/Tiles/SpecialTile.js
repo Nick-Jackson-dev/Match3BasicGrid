@@ -1,7 +1,8 @@
 //JS File
 "use strict";
 
-//SpecialTile has 4 subclasses: MultiTarget, VerticalZap, Horizontal Zap, homingRocket, and VoidBomb, specialID's 1,2,3, 4,and 5 respectively
+
+//SpecialTile has 4 subclasses: MultiTarget, VerticalZap, Horizontal Zap, and VoidBomb, specialID's 1,2,3,and 5 respectively
 //inherits from Tile.js 
 //initialized to moveable, type = TileType.special
 //they cannot permanently switch, but rather will switch with a tile then activate
