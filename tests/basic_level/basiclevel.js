@@ -45,6 +45,7 @@ powerupjs.Game.loadAssets = function() {
     sprites.void_implosion = loadSprite("tiles/animations/implosion@21.png");
     //tricky tile overlays
     //tricky tile animations
+    sprites.overlay_none = loadSprite("tiles/animations/rust_break@14.png");
     sprites.rust_bust = loadSprite("tiles/animations/rust_break@14.png");
     sprites.ink_squirt = loadSprite("tiles/animations/ink_squirt@21.png");
 
@@ -90,6 +91,7 @@ powerupjs.Game.initialize = function() {
     ID.layer_background_3 = 4;
     ID.layer_tiles = 10;
     ID.layer_tiles_1 = 11;
+    ID.layer_tile_overlays = 12;
     ID.layer_objects = 20;
     ID.layer_objects_1 = 21;
     ID.layer_objects_2 = 22;
@@ -113,9 +115,10 @@ powerupjs.Game.initialize = function() {
     ID.game_state_help = powerupjs.GameStateManager.add(new HelpState());
     ID.game_state_settings = powerupjs.GameStateManager.add(new SettingsState());
     //ID.game_state_playing = powerupjs.GameStateManager.add(new PlayingState());
-    ID.game_state_basiclevel_test = powerupjs.GameStateManager.add(new TestingBasicLevelState());
 
+    ID.game_state_basiclevel_test = powerupjs.GameStateManager.add(new TestingBasicLevelState());
+    console.log("initialized");
     // set the current game mode
     powerupjs.GameStateManager.switchTo(ID.game_state_settings);
-    console.log("initialized");
+
 };

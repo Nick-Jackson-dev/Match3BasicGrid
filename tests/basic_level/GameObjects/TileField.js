@@ -41,7 +41,7 @@ TileField.prototype.handleComputerInput = function(delta) {
     }
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) {
-            if (powerupjs.Mouse.containsMouseDown(this.at(j, i).boundingBox)) {
+            if (powerupjs.Mouse.containsMouseDown(this.at(j, i).tile.boundingBox)) {
                 if (this.at(j, i).velocity.x !== 0 || this.at(j, i).velocity.y !== 0) {
                     return;
                 }
@@ -68,7 +68,7 @@ TileField.prototype.handleTouchInput = function(delta) {
     }
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) {
-            if (powerupjs.Touch.containsTouch(this.at(j, i).boundingBox)) {
+            if (powerupjs.Touch.containsTouch(this.at(j, i).tile.boundingBox)) {
                 if (this.at(j, i).velocity.x !== 0 || this.at(j, i).velocity.y !== 0) {
                     return;
                 }
@@ -109,7 +109,6 @@ TileField.prototype.resolveMatches = function(initializing) {
 
     while (this.straightVerticalMatches.length > 0 ||
         this.straightHorizontalMatches.length > 0 ||
-        //this.squareMatches.length > 0 || //getting rid of homign rockets
         this.intersectingMatches.length > 0 ||
         this.longMatches.length > 0 ||
         this.extraLongMatches.length > 0) {
@@ -134,9 +133,7 @@ TileField.prototype.findMatches = function(initializing) {
     this.findVerticalMatches(initializing);
     if (!initializing && this.special) { //finds long, extra long, T, L and Square matches and handles the insertion of the appropriate special tile
         this.intersectingMatches = [];
-        //this.squareMatches = [];//getting rid of homing rockets
         this.findVoidBombs();
-        //this.findHomingRockets(); //getting rid of homing rockets
     }
 };
 
@@ -179,7 +176,7 @@ TileField.prototype.shiftTilesFast = function() {
     for (let i = this.columns - 1; i >= 0; i--) {
         for (let j = this.rows - 1; j >= 0; j--) { //loop bottom to top
             if (this.at(i, j).type === TileType.deleted) {
-                var t = new BasicTile(TileType.basic);
+                var t = new TilePair(OverlayType.none, TileType.basic, BasicID.random);
                 this.addAt(t, i, j);
             } else {
                 var shift = this.at(i, j).shift;
@@ -201,7 +198,7 @@ TileField.prototype.shiftTiles = function() {
     //eventually this will only be if not special, if special first check for special spawner
     for (let i = 0, r = this.columns; i < r; i++) {
         if (this.at(i, 0).type === TileType.deleted) {
-            this.addAt(new BasicTile(TileType.basic), i, 0);
+            this.addAt(new TilePair(OverlayType.none, TileType.basic, BasicID.random), i, 0);
         }
     }
     //see what needs a shift based on deleted tiles
@@ -248,7 +245,6 @@ TileField.prototype.shiftTiles = function() {
             tiles.findMatches();
             if (tiles.straightVerticalMatches.length > 0 ||
                 tiles.straightHorizontalMatches.length > 0 ||
-                //tiles.squareMatches.length > 0 || //getting rid of homing rockets
                 tiles.intersectingMatches.length > 0 ||
                 tiles.longMatches.length > 0 ||
                 tiles.extraLongMatches.length > 0) {
@@ -297,16 +293,6 @@ TileField.prototype.loopMatches = function(initializing) {
         }
     }
     if (!initializing && this.special) {
-        /*for (let i = this.squareMatches.length - 1; i >= 0; i--) {
-            var square = this.squareMatches[i];
-            this.at(square.col, square.row).deleteTile();
-            this.at(square.col + 1, square.row).deleteTile();
-            this.at(square.col + 1, square.row + 1).deleteTile();
-            this.at(square.col, square.row + 1).deleteTile();
-            var HR = new HomingRocket();
-            this.addAt(HR, square.insertionCol, square.insertionRow);
-        }*/ // getting rid of homing rockets
-
         //{columnHor, rowHor, lengthHor, columnVer, rowVer, lengthVer, intersetion{col, row}}
         for (let i = 0, t = this.intersectingMatches.length - 1; i <= t; i++) {
             var crossMatch = this.intersectingMatches[i];
@@ -316,7 +302,7 @@ TileField.prototype.loopMatches = function(initializing) {
             for (let j = 0, l = crossMatch.lengthVert - 1; j <= l; j++) {
                 this.at(crossMatch.columnVert, crossMatch.rowVert + j).deleteTile();
                 if (crossMatch.rowVert + j === crossMatch.intersection.row) {
-                    let VB = new VoidBomb();
+                    let VB = new TilePair(OverlayType.none, TileType.special, SpecialID.bomb);
                     this.addAt(VB, crossMatch.columnVert, crossMatch.rowVert + j)
                 }
             }
@@ -335,10 +321,10 @@ TileField.prototype.loopMatches = function(initializing) {
                 }
             }
             if (match.horizontal) {
-                let Z = new VerticalLazer();
+                let Z = new TilePair(OverlayType.none, TileType.special, SpecialID.vline);
                 this.addAt(Z, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
             } else {
-                let Z = new HorizontalLazer();
+                let Z = new TilePair(OverlayType.none, TileType.special, SpecialID.hline);
                 this.addAt(Z, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
             }
         }
@@ -357,7 +343,7 @@ TileField.prototype.loopMatches = function(initializing) {
                     rOffset++;
                 }
             }
-            let M = new MultiTarget();
+            let M = new TilePair(OverlayType.none, TileType.special, SpecialID.multi);
             this.addAt(M, match.insertionPoint.insertCol, match.insertionPoint.insertRow);
         }
     }
@@ -435,11 +421,8 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
             tiles.resolveMatches();
 
             if (swap.type === TileType.special && swap2.type === TileType.special) {
-                //find and perform combination
+                //find and perform combination - should use
                 tiles.findMixType(swap, swap2);
-                //tiles.chainsLeft += 2; //temp
-                //swap.activate(); //temp
-                //swap2.activate(); //temp
             } else if (swap.type === TileType.special) {
                 if (swap.specialTileID === 1) { //multi target
                     tiles.chainsLeft += 1;
@@ -468,7 +451,7 @@ TileField.prototype.swapTiles = function(tile1, tile2, swapBack) {
 
 TileField.prototype.selectTile = function(tile) {
     if (tile.type === TileType.background || tile === this.selected) { // do not select background tiles or the same tile, unless it is special tile already
-        if (tile.type === TileType.special && tile === this.selected && (powerupjs.Mouse.containsMousePress(tile.boundingBox) || powerupjs.Touch.containsTouchPress(tile.boundingBox))) {
+        if (tile.type === TileType.special && tile === this.selected && (powerupjs.Mouse.containsMousePress(tile.tile.boundingBox) || powerupjs.Touch.containsTouchPress(tile.tile.boundingBox))) {
             //the contain toucha nd mouse press are to prevent activation on click/touch and hold
             this.chainsLeft += 1;
             tile.activate();
@@ -479,7 +462,7 @@ TileField.prototype.selectTile = function(tile) {
     this.deselect();
     this.selected = tile;
     this.selected.ID = ID.selected_tile;
-    //console.log(this.selected);
+    console.log(this.selected);
     selectBorder.position = tile.position.copy();
     selectBorder.position.x += 340;
     selectBorder.position.y += 60;
@@ -743,7 +726,7 @@ TileField.prototype.findVerticalMoves = function(initializing) {
 TileField.prototype.findMixType = function(tile1, tile2) {
     var activatedLoc = undefined; //will have the tile that was moved assigned to it, to know where the start of activation will be
     var nonActivatedLoc = undefined; //these will keep them straight when calling for the activation functions
-    var special1 = tile1.specialTileID; //options are 1=multitarget, 2=vertical zap, 3 = horizontal zap, 5 = void bomb 
+    var special1 = tile1.specialTileID; //options are 1=multitarget, 2=bomb, 3 = vert line, 4 = hor line 
     var special2 = tile2.specialTileID;
     if (tile1.ID === ID.selected_tile) {
         activatedLoc = tile2;
@@ -755,22 +738,23 @@ TileField.prototype.findMixType = function(tile1, tile2) {
     activatedLoc.type = TileType.basic; //so they don't activate when doubly
     nonActivatedLoc.type = TileType.basic;
     //find and activate appropriate activation type
+    //THESE NEED REDONE FOR NEW PAIR CLASS - has been changed, not tested - should be changed to SpecialID.{{name}} eventually
     if (special1 === 1 && special2 === 1) { //multitarget and multitarget
         //call for the board wipe
         this.multiMultiActivation(activatedLoc, nonActivatedLoc);
-    } else if ((special1 === 2 || special1 === 3) && (special2 === 2 || special2 === 3)) { //any zap mixed with any zap
+    } else if ((special1 === 4 || special1 === 3) && (special2 === 4 || special2 === 3)) { //any zap mixed with any zap
         //activate horizonta l and vertical at activationLoc
         this.zapZapActivation(activatedLoc);
-    } else if (special1 === 5 && special2 === 5) { //VoidBomb and VoidBomb
+    } else if (special1 === 2 && special2 === 2) { //VoidBomb and VoidBomb
         //large explosion centered at activationLoc
         this.voidVoidActivation(activatedLoc);
-    } else if ((special1 === 1 || special1 === 2 || special1 === 3) && (special2 === 1 || special2 === 2 || special2 === 3)) { //this is only multi mixed with a zap
+    } else if ((special1 === 1 || special1 === 4 || special1 === 3) && (special2 === 1 || special2 === 4 || special2 === 3)) { //this is only multi mixed with a zap
         //turn all of a random color into a random direction zap
         this.multiZapActivation(activatedLoc, nonActivatedLoc);
-    } else if ((special1 === 1 || special1 === 5) && (special2 === 1 || special2 === 5)) { //bomba nd multi
+    } else if ((special1 === 1 || special1 === 2) && (special2 === 1 || special2 === 2)) { //bomba nd multi
         //turn all of a random color into void bombs
         this.multiVoidActivation(activatedLoc, nonActivatedLoc);
-    } else if ((special1 === 2 || special1 === 3 || special1 === 5) && (special2 === 2 || special2 === 3 || special2 === 5)) { //zap and voidbomb
+    } else if ((special1 === 4 || special1 === 3 || special1 === 2) && (special2 === 4 || special2 === 3 || special2 === 2)) { //zap and voidbomb
         //centered at point of activation do 3 verticals and 3 horizontals destroyed 
         this.voidZapActivation(activatedLoc);
     }
@@ -830,9 +814,9 @@ TileField.prototype.multiZapActivation = function(source, nonsource) {
         setTimeout(function(tiles, x, y, direction) {
             tiles.at(x, y).deleteTile(true);
             if (direction === 0) {
-                tiles.addAt(new VerticalLazer(), x, y);
+                tiles.addAt(new TilePair(OverlayType.none, TileType.special, SpecialID.vline), x, y);
             } else {
-                tiles.addAt(new HorizontalLazer(), x, y);
+                tiles.addAt(new TilePair(OverlayType.none, TileType.special, SpecialID.hline), x, y);
             }
             tiles.at(x, y).activate();
         }, timer, this, x, y, direction); //timer should be variable
@@ -863,7 +847,7 @@ TileField.prototype.multiVoidActivation = function(source, nonsource) {
 
         setTimeout(function(tiles, x, y) {
             tiles.at(x, y).deleteTile(true);
-            tiles.addAt(new VoidBomb(), x, y);
+            tiles.addAt(new TilePair(OverlayType.none, TileType.special, SpecialID.bomb), x, y);
             tiles.at(x, y).activate();
         }, timer, this, x, y); //timer should be variable
     }

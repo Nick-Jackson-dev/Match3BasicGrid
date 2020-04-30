@@ -9,21 +9,46 @@ var TileType = {
     empty: 3,
     deleted: 6
 };
+var BasicID = {
+    pink: 0,
+    blue: 1,
+    green: 2,
+    orange: 3,
+    red: 4,
+    yellow: 5,
+    random: 10 //undefined works too
+};
+var SpecialID = {
+    multi: 1,
+    bomb: 2,
+    vline: 3,
+    hline: 4
+};
 
 //Tile objects are initialized to normal 
-//inherits from powerupjs.SpriteGameObject
-//want to change inheritance to powerupjs.AnimatedGameObject once animations are made
+//inherits from powerupjs.GameObjectList and contains a tilebase and an overlay object.
+//this class entangles its member's behaviours
 
-function Tile(tileTp, layer, id) {
+function Tile(layer, id) {
     powerupjs.AnimatedGameObject.call(this, layer, id);
-    this.type = tileTp;
-    this.moveable = true; // if not movable it doesn't fall even with nothing under it and can't be switched - not implemented yet
-    this.initiate();
+    this.position = powerupjs.Vector2.zero;
 }
 
 Tile.prototype = Object.create(powerupjs.AnimatedGameObject.prototype);
 
-Tile.prototype.initiate = function() {
+Tile.prototype.update = function(delta) {
+    //this.velocity = this.parent.velocity;
+    //if (this.velocity.x === 0 && this.velocity.y === 0) {
+    //this.position = powerupjs.Vector2.zero;
+    //}
+    powerupjs.AnimatedGameObject.prototype.update.call(this, delta);
+
+};
+
+Tile.prototype.draw = function() {
+    powerupjs.AnimatedGameObject.prototype.draw.call(this);
+};
+/*Tile.prototype.initiate = function() {
     this._tileSpeed = 400; // pixels/sec
     this.shift = 0;
     this.falling = false;
@@ -72,35 +97,4 @@ Tile.prototype.deleteTile = function(nullifyScore) {
         this.parent.parent.tilesDestroyed += 1;
     tiles.deselect();
 };
-
-Tile.prototype.update = function(delta) {
-    if (!this.moveable) { // no updating position if not movable
-        return;
-    }
-    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight && !this.turning && !this.thrusting) {
-        this.velocity = powerupjs.Vector2.zero;
-    }
-    if (this.shiftingLeft) {
-        this.velocity.x = -this.tileSpeed;
-    }
-    if (this.shiftingRight) {
-        this.velocity.x = this.tileSpeed;
-    }
-    if (this.shiftingUp) {
-        this.velocity.y = -this.tileSpeed;
-    }
-    if (this.shiftingDown) {
-        this.velocity.y = this.tileSpeed;
-    }
-    if (this.falling) {
-        this.velocity.y = this.tileSpeed;
-    }
-    //some things from V1.2 deleted from this area and this method reorganized
-    powerupjs.AnimatedGameObject.prototype.update.call(this, delta);
-};
-
-Tile.prototype.draw = function() {
-    if (this.type === TileType.background || this.type === TileType.deleted || this.type === TileType.empty)
-        return;
-    powerupjs.AnimatedGameObject.prototype.draw.call(this);
-};
+*/

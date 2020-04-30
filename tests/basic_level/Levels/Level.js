@@ -102,6 +102,7 @@ Level.prototype.loadTiles = function() {
     var done = false;
     //loading the tiles in the grid
     while (!done) {
+        //done = true;
         //generates a board
         for (var y = 0, ly = this.tiles.rows; y < ly; ++y) {
             for (var x = 0, lx = this.tiles.columns; x < lx; ++x) {
@@ -124,85 +125,41 @@ Level.prototype.loadTiles = function() {
 Level.prototype.loadTile = function(tileType, x, y) {
     switch (tileType) {
         case '?':
-            return this.loadBasicTile(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.random);
         case '0':
-            return this.loadBasicPink(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.pink);
         case '1':
-            return this.loadBasicBlue(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.pink);
         case '2':
-            return this.loadBasicGreen(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.green);
         case '3':
-            return this.loadBasicOrange(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.orange);
         case '4':
-            return this.loadBasicRed(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.red);
         case '5':
-            return this.loadBasicYellow(TileType.basic);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.yellow);
         case 'b':
-            return this.loadVoidBomb();
-            //case 'r':
-            //return this.loadHomingRocket(); //homing rockets not being used
+            return this.loadIndTile(OverlayType.none, TileType.special, SpecialID.bomb);
         case 'm':
-            return this.loadMultiTarget();
+            return this.loadIndTile(OverlayType.none, TileType.special, SpecialID.multi);
         case 'h':
-            return this.loadHorizontalLazer();
+            return this.loadIndTile(OverlayType.none, TileType.special, SpecialID.hline);
         case 'v':
-            return this.loadVerticalLazer();
+            return this.loadIndTile(OverlayType.none, TileType.special, SpecialID.vline);
+        case 'o':
+            return this.loadIndTile(OverlayType.rust, TileType.basic, BasicID.random);
+        case 'i':
+            return this.loadIndTile(OverlayType.ink, TileType.basic, BasicID.random);
         default:
-            return this.loadBasicTile(TileType.background);
+            return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.random);
     }
 };
 
 
-Level.prototype.loadBasicTile = function(tileType) {
-    var t = new BasicTile(tileType);
+Level.prototype.loadIndTile = function(overlayType, tileType, tileID) {
+    overlayType = typeof overlayType != 'undefined' ? overlayType : OverlayType.none;
+    tileType = typeof tileType != 'undefined' ? tileType : TileType.basic;
+    tileID = typeof tileID != 'undefined' ? tileID : BasicID.random;
+    var t = new TilePair(overlayType, tileType, tileID);
     return t;
 };
-Level.prototype.loadVoidBomb = function() {
-    var vb = new VoidBomb();
-    return vb;
-};
-Level.prototype.loadMultiTarget = function() {
-    var mt = new MultiTarget();
-    return mt;
-};
-Level.prototype.loadHorizontalLazer = function() {
-    var hl = new HorizontalLazer();
-    return hl;
-};
-Level.prototype.loadVerticalLazer = function() {
-    var vl = new VerticalLazer();
-    return vl;
-};
-
-//loading the different basic types in specific spots
-Level.prototype.loadBasicPink = function(tileType) {
-    var t = new BasicTile(tileType, 0);
-    return t;
-};
-Level.prototype.loadBasicBlue = function(tileType) {
-    var t = new BasicTile(tileType, 1);
-    return t;
-};
-Level.prototype.loadBasicGreen = function(tileType) {
-    var t = new BasicTile(tileType, 2);
-    return t;
-};
-Level.prototype.loadBasicOrange = function(tileType) {
-    var t = new BasicTile(tileType, 3);
-    return t;
-};
-Level.prototype.loadBasicRed = function(tileType) {
-    var t = new BasicTile(tileType, 4);
-    return t;
-};
-Level.prototype.loadBasicYellow = function(tileType) {
-    var t = new BasicTile(tileType, 5);
-    return t;
-};
-
-
-/*homing rockets not being used
-Level.prototype.loadHomingRocket = function() {
-    var hr = new HomingRocket();
-    return hr;
-};*/
