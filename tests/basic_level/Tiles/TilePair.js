@@ -155,6 +155,7 @@ TilePair.prototype.deleteTile = function(nullifyScore) {
 
 TilePair.prototype.update = function(delta) {
     this.tile.position = this.overlay.position = powerupjs.Vector2.zero;
+    powerupjs.GameObjectList.prototype.update.call(this, delta);
     if (!this.moveable) { // no updating position if not movable
         return;
     }
@@ -178,7 +179,7 @@ TilePair.prototype.update = function(delta) {
     }
     this.position.x += this.velocity.x * delta;
     this.position.y += this.velocity.y * delta;
-    powerupjs.GameObjectList.prototype.update.call(this, delta);
+
 };
 
 TilePair.prototype.draw = function() {

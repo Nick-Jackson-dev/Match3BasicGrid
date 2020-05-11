@@ -42,10 +42,13 @@ powerupjs.Game.loadAssets = function() {
     sprites.multi_target = loadSprite("tiles/multi_target.png");
     //special tile animations
     sprites.horizontal_zap = loadSprite("tiles/animations/hor_zap@17.png");
+    sprites.vertical_zap = loadSprite("tiles/animations/vert_zap@1x17.png");
     sprites.void_implosion = loadSprite("tiles/animations/implosion@21.png");
     //tricky tile overlays
+    sprites.rust_init = loadSprite("tiles/static_overlays/rust.png");
+    sprites.ink_init = loadSprite("tiles/static_overlays/ink.png");
     //tricky tile animations
-    sprites.overlay_none = loadSprite("tiles/animations/rust_break@14.png");
+    sprites.overlay_none = loadSprite("tiles/static_overlays/rust.png");
     sprites.rust_bust = loadSprite("tiles/animations/rust_break@14.png");
     sprites.ink_squirt = loadSprite("tiles/animations/ink_squirt@21.png");
 

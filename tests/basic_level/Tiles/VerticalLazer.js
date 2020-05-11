@@ -7,7 +7,7 @@ function VerticalLazer() {
     Tile.call(this);
 
     this.loadAnimation(sprites.lazer_vertical, "idle", true);
-    this.loadAnimation(sprites.horizontal_zap, "zap", false, 0.02);
+    //this.loadAnimation(sprites.vertical_zap, "zap", false, 0.02);
     this.playAnimation("idle");
 }
 VerticalLazer.prototype = Object.create(Tile.prototype);
@@ -15,7 +15,7 @@ VerticalLazer.prototype = Object.create(Tile.prototype);
 VerticalLazer.prototype.activate = function() {
     var tiles = this.root.find(ID.actual_tiles);
     tiles.activeVerticalZap(this.parent.xCoordinate, this.parent.yCoordinate);
-    this.playAnimation("zap");
+    this.sisterOverlay.overlayType = OverlayType.vzap;
 };
 
 VerticalLazer.prototype.update = function(delta) {
