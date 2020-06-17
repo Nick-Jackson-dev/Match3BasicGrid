@@ -111,18 +111,26 @@ Level.prototype.loadTiles = function() {
             }
         }
         //reolve all matches upon loading
+        console.log("starting to resolve matches");
         this.tiles.resolveMatches(true);
+        console.log("matches resolved");
         //need to be able to make at least one move so find out if there are any moves
+        console.log("now finding moves");
         this.tiles.findMoves(true);
+        console.log("moves found");
         //end loop
         if (this.tiles.moves.length > 0) {
+            console.log("good to go after loading all tiles");
             done = true;
+        } else {
+            console.log("not good to go after loading tiles");
         }
     }
 };
 
 //loadtile based on character
 Level.prototype.loadTile = function(tileType, x, y) {
+    console.log("loading a tile");
     switch (tileType) {
         case '?':
             return this.loadIndTile(OverlayType.none, TileType.basic, BasicID.random);

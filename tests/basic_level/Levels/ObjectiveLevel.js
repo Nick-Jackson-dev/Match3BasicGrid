@@ -1,13 +1,13 @@
 //JS file
 "use strict"
 
-//EnduranceLevel inherits from Level.
+//ObjectiveLevel inherits from Level.
 //goal is to score the target pooints in the time aloted
 //in addition to what Level holds this: holds a target score and a player score that increases as matches are made
 //holds a timer - if the timer runs out the player loses
 
-function EnduranceLevel(levelData) {
-    Level.call(this, levelData, false);
+function ObjectiveLevel(levelData) {
+    Level.call(this, levelData);
 
     this.targetScore = levelData.targetScore; //this is the number
     var targetScore = new powerupjs.Label("Arial", "26pt", ID.layer_overlays_2); //this is the object that shows the target score
@@ -21,9 +21,9 @@ function EnduranceLevel(levelData) {
     this.timer = new CountDownTimer(90); //(startTime)
     this.add(this.timer);
 }
-EnduranceLevel.prototype = Object.create(Level.prototype);
+ObjectiveLevel.prototype = Object.create(Level.prototype);
 
-EnduranceLevel.prototype.handleInput = function(delta) {
+ObjectiveLevel.prototype.handleInput = function(delta) {
     //buttons and stuff should still be clickable/tappable after level has ended
     if (powerupjs.Touch.isTouchDevice) {
         this.handleTouchInput(delta);
@@ -38,15 +38,15 @@ EnduranceLevel.prototype.handleInput = function(delta) {
     Level.prototype.handleInput.call(this, delta);
 };
 
-EnduranceLevel.prototype.handleComputerInput = function(delta) {
+ObjectiveLevel.prototype.handleComputerInput = function(delta) {
 
 };
 
-EnduranceLevel.prototype.handleTouchInput = function(dleta) {
+ObjectiveLevel.prototype.handleTouchInput = function(dleta) {
 
 };
 
-EnduranceLevel.prototype.update = function(delta) {
+ObjectiveLevel.prototype.update = function(delta) {
     Level.prototype.update.call(this, delta);
     if (this.timer.gameOver && this.playerScore.scoreCounter === 0) {
         console.log("You Lose")
@@ -68,7 +68,7 @@ EnduranceLevel.prototype.update = function(delta) {
     }
 };
 
-EnduranceLevel.prototype.reset = function() {
+ObjectiveLevel.prototype.reset = function() {
     Level.prototype.reset.call(this);
     this.tilesDestroyed = 0;
 };

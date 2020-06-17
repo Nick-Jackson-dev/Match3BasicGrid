@@ -30,21 +30,31 @@ function TestingBasicLevelState() {
     this.enduranceLevels = [];
     this.objectiveLevels = [];
     this.combatLevels = [];
-
+    console.log("loading levels");
     this.loadLevels();
+    console.log("levels have been loaded")
 
+    console.log("going to initial level")
     this.goToLevel(this.enduranceLevels); //initialized just for test
+    console.log("passed initial level test");
 }
 
 TestingBasicLevelState.prototype = Object.create(powerupjs.IGameLoopObject.prototype);
 
 TestingBasicLevelState.prototype.loadLevels = function() {
-    for (var i = 0, l = this.allPlanetLevels.length; i < l; i++) {
+    for (var i = 0, l = this.allPlanetLevels.length - 1; i <= l; i++) {
+        console.log("starting iteration " + i + " of loading levels")
         if (this.allPlanetLevels[i]._timeTrialLevel) {
+            console.log("its a time trial");
             this.timeTrialLevels.push(new TimeTrialLevel(this.allPlanetLevels[i]));
         } else if (this.allPlanetLevels[i]._enduranceLevel) {
+            console.log("its an endurance level");
             this.enduranceLevels.push(new EnduranceLevel(this.allPlanetLevels[i]));
+        } else if (this.allPlanetLevels[i]._objectiveLevel) {
+            console.log("its an objective level");
+            this.objectiveLevels.push(new ObjectiveLevel(this.allPlanetLevels[i]));
         }
+        console.log("ending iteration " + i + " of loading levels");
     }
     //would do the same with default levels
     //do the same with ither level types
@@ -106,6 +116,8 @@ TestingBasicLevelState.prototype.goToLevelIndex = function(index) {
         this.goToLevel(this.timeTrialLevels);
     } else if (index === 1) {
         this.goToLevel(this.enduranceLevels);
+    } else if (index === 2) {
+        this.goToLevel(this.objectiveLevels);
     }
 };
 

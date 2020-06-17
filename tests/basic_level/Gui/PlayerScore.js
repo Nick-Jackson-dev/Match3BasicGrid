@@ -37,7 +37,7 @@ PlayerScore.prototype.increase = function() {
 
 PlayerScore.prototype.update = function(delta) {
     if (this.scoreCounter > 0) {
-        this.score += 1
+        this.score += 1;
         this.scoreCounter -= 1;
     }
     this.text = this.score;

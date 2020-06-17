@@ -15,7 +15,7 @@ HorizontalLazer.prototype = Object.create(Tile.prototype);
 HorizontalLazer.prototype.activate = function() {
     var tiles = this.root.find(ID.actual_tiles);
     tiles.activeHorZap(this.parent.xCoordinate, this.parent.yCoordinate);
-    this.sisterOverlay.overlayType = OverlayType.hzap;
+    this.sisterOverlay.horizontalZapActivate();
 };
 
 HorizontalLazer.prototype.update = function(delta) {

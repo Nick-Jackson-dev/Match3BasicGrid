@@ -15,7 +15,7 @@ VerticalLazer.prototype = Object.create(Tile.prototype);
 VerticalLazer.prototype.activate = function() {
     var tiles = this.root.find(ID.actual_tiles);
     tiles.activeVerticalZap(this.parent.xCoordinate, this.parent.yCoordinate);
-    this.sisterOverlay.overlayType = OverlayType.vzap;
+    this.sisterOverlay.verticalZapActivate();
 };
 
 VerticalLazer.prototype.update = function(delta) {

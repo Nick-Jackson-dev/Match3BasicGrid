@@ -1,6 +1,6 @@
 "use strict";
 
-//TilePair contains the tile graphic and overlay pair
+//TilePair contains the tile and overlay pair
 //inherits from powerupjs.GameObjectList
 //entangels the two together
 /*
@@ -8,7 +8,7 @@ var TileType = {
     background: 0,
     basic: 1,
     special: 2,
-    empty: 3,
+    empty: 4,
     deleted: 6
 };
 var OverlayType = {
@@ -40,9 +40,6 @@ function TilePair(overlayType, type, tileID, layer, id) {
     powerupjs.GameObjectList.call(this, layer, id);
     //console.log("passed overlay: " + overlayType + " , passed type: " + type + " , passed ID: " + tileID);
     this.overlayType = overlayType;
-    if (this.overlayType === 4 || this.overlayType == 'undefined') {
-        console.log(this.overlayType);
-    }
     this.type = type;
     this.basicTileID = undefined;
     this.specialTileID = undefined;
@@ -65,7 +62,7 @@ function TilePair(overlayType, type, tileID, layer, id) {
 TilePair.prototype = Object.create(powerupjs.GameObjectList.prototype);
 
 TilePair.prototype.initiate = function() {
-    this._tileSpeed = 400; // pixels/sec
+    this._tileSpeed = 475; // pixels/sec
     this.shift = 0;
     this.moveable = true;
     this.damageable = false;
@@ -100,17 +97,15 @@ TilePair.prototype.initiate = function() {
         //and this.damageable to true as well
     } else if (this.overlayType === OverlayType.rust) {
         this.overlay = new TileOverlay(OverlayType.rust);
-        this.rusty = true; //IDK if i need this
         this.moveable = false;
     } else if (this.overlayType === OverlayType.ink) {
         this.overlay = new TileOverlay(OverlayType.ink);
+        this.moveable = false;
     } else {
         this.overlay = new TileOverlay();
     }
     this.add(this.overlay);
-    if (this.overlay.overlayType !== OverlayType.none) {
-        console.log(this);
-    }
+
     //link the two initially - need to link in update as well
     this.overlay.sisterTile = this.tile;
     this.tile.sisterOverlay = this.overlay;
@@ -144,22 +139,51 @@ TilePair.prototype.beStill = function() {
     this.velocity = powerupjs.Vector2.zero;
 };
 
-TilePair.prototype.deleteTile = function(nullifyScore) {
+//remove trickiness, delete basic or activate special (eventually) in that order
+TilePair.prototype.deleteTile = function(nullifyScore, checkEffects) {
     nullifyScore = typeof nullifyScore != 'undefined' ? nullifyScore : false;
+    checkEffects = typeof checkEffects != 'undefined' ? checkEffects : true;
     var tiles = this.root.find(ID.actual_tiles);
-    this.type = TileType.deleted;
-    if (!nullifyScore)
-        this.root.tilesDestroyed += 1;
+    //eventually want to do the removing of overlays based on type being TileType.tricky then call a function to figure out what to do based on overlay
+    //then delete basic tiles if it isn't a tricky one
+    //then activate special tiles if it isnt tricky or basic
+    if (this.overlay.overlayType === OverlayType.rust) {
+        if (!nullifyScore)
+            this.removeRust(); // this could call just the TileOverlay.rustBust method later
+    } else if (this.overlay.overlayType === OverlayType.ink) {
+        if (!nullifyScore)
+            this.removeInk(); // this could call just the TileOverlay.inkSquirt method later
+    } else {
+        this.type = TileType.deleted;
+        if (checkEffects) {
+            tiles.checkAdjacentEffects(this.xCoordinate, this.yCoordinate); //checks to see if a tile this one is touching when deleted should behave in a special way
+        }
+        if (!nullifyScore)
+            this.root.tilesDestroyed += 1;
+    }
     tiles.deselect();
+};
+//to remove rust the tile needs to be made moveable and then the overlay will have to take care of its part
+TilePair.prototype.removeRust = function() {
+    console.log("removing rust");
+    this.overlay.rustBust();
+};
+//to remove ink the overlay will have to do its thing
+TilePair.prototype.removeInk = function() {
+    console.log("removing ink");
+    this.overlay.inkSquirt();
 };
 
 TilePair.prototype.update = function(delta) {
-    this.tile.position = this.overlay.position = powerupjs.Vector2.zero;
+    //the overlay and the tile graphics need to separate if the retical is travelling to it
+    if (this.overlay.overlayType !== OverlayType.is_target) {
+        this.tile.position = this.overlay.position = powerupjs.Vector2.zero;
+    }
     powerupjs.GameObjectList.prototype.update.call(this, delta);
     if (!this.moveable) { // no updating position if not movable
         return;
     }
-    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight && !this.turning && !this.thrusting) {
+    if (!this.shiftingUp && !this.shiftingDown && !this.shiftingLeft && !this.shiftingRight) {
         this.velocity = powerupjs.Vector2.zero;
     }
     if (this.shiftingLeft) {
@@ -177,6 +201,7 @@ TilePair.prototype.update = function(delta) {
     if (this.falling) {
         this.velocity.y = this.tileSpeed;
     }
+    //have velocityinfluence position over time - powerupjs.GameObjectList does not do this by default
     this.position.x += this.velocity.x * delta;
     this.position.y += this.velocity.y * delta;
 
@@ -190,6 +215,7 @@ TilePair.prototype.draw = function() {
 
 TilePair.prototype.activate = function(basicID) {
     basicID = typeof basicID != 'undefined' ? basicID : Math.floor(Math.random() * 6);
+    //multi-target activation has parameters, others are independant; this handles that
     if (this.specialTileID === SpecialID.multi) {
         this.tile.activate(basicID);
     } else {

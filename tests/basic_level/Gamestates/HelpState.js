@@ -8,7 +8,7 @@ function HelpState(layer) {
     powerupjs.GameObjectList.call(this, layer);
 
     // the background
-    this.background = new powerupjs.SpriteGameObject(sprites.temp_pardon_dust_overlay);
+    this.background = new powerupjs.SpriteGameObject(sprites.temp_settings_bg);
     this.background.position = this.background.screenCenter;
     this.add(this.background);
 
